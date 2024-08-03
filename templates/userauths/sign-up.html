@@ -1,0 +1,6 @@
+<form action="" method="POST">
+    {% csrf_token %} {% comment %} This is a token code for detection of malicious activity {% endcomment %}
+    
+    {{form.as_p}} {% comment %} For leaving a paragraph with forms  {% endcomment %}
+    <button type="submit">Register</button>
+</form>

@@ -1,6 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from userauths.forms import UserRegisterForm
 
-# Create your views here.
+def register_view(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('userauths:sign-up-success')  # Redirect to a success page or login page
+    else:
+        form = UserRegisterForm()
 
-def register_views(request):
-    return render(request, "userauths/sign-up.html")
+    return render(request, 'userauths/sign-up.html', {'form': form})

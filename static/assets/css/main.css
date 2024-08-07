@@ -339,6 +339,7 @@ input[type=number]:focus,
 
 .border-radius-15 {
     border-radius: 15px;
+    width: 90%;
 }
 
 .border-radius-20 {
@@ -7263,13 +7264,24 @@ h6.post-title {
 }
 
 .logo.logo-width-1 {
+    margin-left: 1rem;
     margin-right: 70px;
+}
+/* Remove if necessary just testing */
+.logo.logo-width-1 a {
+    width: 180px;
+    min-width: 180px;
+    display: flex;
 }
 
 .logo.logo-width-1 a img {
-    width: 180px;
-    min-width: 180px;
+    width: 35%;
 }
+
+.logo.logo-width-1 a p {
+    margin-top: 4px;
+}
+
 
 .search-style-1 form {
     width: 370px;

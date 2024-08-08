@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect
-from userauths.forms import UserRegisterForm
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from django.conf import settings
-
-User = settings.AUTH_USER_MODEL
+from userauths.forms import UserRegisterForm
+from .models import CustomUser
 
 def register_view(request):
     if request.method == 'POST':
@@ -19,7 +17,7 @@ def register_view(request):
             else:
                 messages.error(request, "Authentication failed. Please check your credentials.")
         else:
-            print(form.errors)
+            messages.error(request, form.errors)
     else:
         form = UserRegisterForm()
 
@@ -30,22 +28,33 @@ def register_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
+        messages.error(request,f"Hey, You are already logged in!")
         return redirect("api:index")
     
     if request.method == "POST":
         id = request.POST.get("id")
-        pin = request.POST.get("pin") 
+        pin = request.POST.get("pin")
         
-    try: 
-        user = User.objects.get(id=id)
-    except:
-        messages.warning(request, f"User with {id} already exists")
+        print(f"ID: {id}, PIN: {pin}")  # Debugging line
+
+        if not id or not pin:
+            messages.error(request, "Both ID and PIN are required.")
+            return redirect("userauths:sign-in")
+
+        user = authenticate(request, id=id, password=pin)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.full_name}!")
+            return redirect("api:index")
+        else:
+            messages.warning(request, "Invalid credentials. Please try again.")
+            return redirect("userauths:sign-in")
     
-    user = authenticate(request, id=id, pin=pin)
-    
-    if user is not None:
-        login(request, user)
-        messages.success(request, f"You are logged in successfully")
-        return redirect("api:index")
-    else:
-        messages.warning(request, "User Does Not Exist, Create An Account")
+    context = {}
+    return render(request, "userauths/sign-in.html", context)
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, f"User logged out successfully")
+    return redirect("userauths:sign-in")

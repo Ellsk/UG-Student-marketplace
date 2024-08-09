@@ -129,6 +129,25 @@ class ProductImages(models.Model):
 ######## Cart, Order, OrderItems and Address ###########
 class CartOrder(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-class CartOrderItems(models.Model):
-    pass
+    price = models.DecimalField(max_digits=999999999999, decimal_places=2, default="1.99")
+    paid_status = models.BooleanField(default=True)
+    order_date = models.DateTimeField(auto_now_add=True)
+    product_status = models.CharField(choices=STATUS_CHOICE, max_length=30, default="processing")
     
+    class Meta:
+        verbose_name_plural = "Cart Order"
+
+class CartOrderItems(models.Model):
+        order = models.ForeignKey(CartOrder, on_delete=models.CASCADE)
+        product_status = models.CharField(max_length=200)
+        item = models.CharField(max_length=200)
+        image = models.CharField(max_length=200)
+        qty = models.CharField(max_length=200)
+        price = models.DecimalField(max_digits=999999999999, decimal_places=2, default="1.99")
+        total = models.DecimalField(max_digits=999999999999, decimal_places=2, default="1.99")
+
+        class Meta:
+            verbose_name_plural = "Cart Order Items"
+
+        def order_img(self):
+            return mark_safe('<img scr="/media/%s" width="50" height="50" />' %(self.image))

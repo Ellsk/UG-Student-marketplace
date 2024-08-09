@@ -142,6 +142,7 @@ class CartOrder(models.Model):
 
 class CartOrderItems(models.Model):
     order = models.ForeignKey(CartOrder, on_delete=models.CASCADE)  # Linked to a CartOrder
+    invoice_no = models.CharField(max_length=200)
     product_status = models.CharField(max_length=200)
     item = models.CharField(max_length=200)
     image = models.CharField(max_length=200)

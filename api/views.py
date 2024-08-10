@@ -23,4 +23,4 @@ def product_list_view(request):
         "products": product
     }
     
-    return render(request, "core/index.html", context)
+    return render(request, "core/product-list.html", context)

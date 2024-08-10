@@ -9,11 +9,11 @@
                         <div class="col-xl-3">
                             <h1 class="mb-15">Categories</h1>
                             <div class="breadcrumb">
-                                <a href="index.html" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
+                                <a href="{% url 'api:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
                                 <span></span> Category
                             </div>
                         </div>
-                      <!-- Filter on Top <div class="col-xl-9 text-end d-none d-xl-block">
+                        <!-- Filter on Top <div class="col-xl-9 text-end d-none d-xl-block">
                             <ul class="tags-list">
                                 <li class="hover-up">
                                     <a href="blog-category-grid.html"><i class="fi-rs-cross mr-10"></i>Shopping</a>
@@ -93,7 +93,7 @@
                                 {% for c in categories %}
                                 <article class="col-xl-4 col-lg-6 col-md-6 text-center hover-up mb-30 animated">
                                     <div class="post-thumb">
-                                        <a href="blog-post-right.html">
+                                        <a href="{% url 'api:category-product-list' c.cid %}">
                                             <img class="border-radius-15" src="{{c.image.url}}" alt="" />
                                         </a>
                                         <div class="entry-meta">
@@ -103,7 +103,7 @@
                                     <div class="entry-content-2">
                                         {% comment %} <h6 class="mb-10 font-sm"><a class="entry-meta text-muted" href="blog-category-grid.html">Side Dish</a></h6> {% endcomment %}
                                         <h4 class="post-title mb-15">
-                                            <a href="blog-post-right.html">{{c.title}}</a>
+                                            <a href="{% url 'api:category-product-list' c.cid %}">{{c.title}}</a>
                                         </h4>
                                         <div class="entry-meta font-xs color-grey mt-10 pb-10">
                                             <div>
@@ -146,21 +146,13 @@
                             <div class="sidebar-widget widget-category-2 mb-50">
                                 <h5 class="section-title style-1 mb-30">Category</h5>
                                 <ul>
+                                    
+                                    {% for c in categories %}
                                     <li>
-                                        <a href="shop-grid-right.html"> <img src="assets/imgs/theme/icons/category-1.svg" alt="" />Milks & Dairies</a><span class="count">30</span>
+                                        <a href="shop-grid-right.html"> <img src="{{c.image.url}}" alt="" />{{c.title}}</a><span class="count">{{c.category.count}}</span>
                                     </li>
-                                    <li>
-                                        <a href="shop-grid-right.html"> <img src="assets/imgs/theme/icons/category-2.svg" alt="" />Clothing</a><span class="count">35</span>
-                                    </li>
-                                    <li>
-                                        <a href="shop-grid-right.html"> <img src="assets/imgs/theme/icons/category-3.svg" alt="" />Pet Foods </a><span class="count">42</span>
-                                    </li>
-                                    <li>
-                                        <a href="shop-grid-right.html"> <img src="assets/imgs/theme/icons/category-4.svg" alt="" />Baking material</a><span class="count">68</span>
-                                    </li>
-                                    <li>
-                                        <a href="shop-grid-right.html"> <img src="assets/imgs/theme/icons/category-5.svg" alt="" />Fresh Fruit</a><span class="count">87</span>
-                                    </li>
+                                    {% endfor %}
+                                         
                                 </ul>
                             </div>
                             <!-- Product sidebar Widget -->

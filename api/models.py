@@ -15,7 +15,7 @@ STATUS = [
     ("disable", "Disabled"),
     ("rejected", "Rejected"),
     ("in_review", "In Review"),
-    ("publish", "Published"),
+    ("published", "Published"),
 ]
 
 RATING = [
@@ -85,6 +85,7 @@ class Product(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)  # Linked to a CustomUser
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)  # Linked to a Category
+    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)  # Linked to a Category
 
     # Allow for large max_digits to handle potentially expensive products
     price = models.DecimalField(max_digits=15, decimal_places=2, default="1.99")

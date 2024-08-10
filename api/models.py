@@ -84,7 +84,7 @@ class Product(models.Model):
     description = models.TextField(null=True, blank=True, default="This is a product")
 
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)  # Linked to a CustomUser
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)  # Linked to a Category
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="category")  # Linked to a Category
     vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)  # Linked to a Category
 
     # Allow for large max_digits to handle potentially expensive products

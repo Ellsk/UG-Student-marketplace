@@ -54,6 +54,7 @@ class Vendor(models.Model):
     vid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="ven", alphabet="abcde12345")
     title = models.CharField(max_length=100, default="Nestify")  # Vendor Name
     image = models.ImageField(upload_to=user_directory_path, default="vendor.jpg")  # Vendor's image
+    cover_image = models.ImageField(upload_to=user_directory_path, default="vendor.jpg")  # Vendor's image
     description = models.TextField(null=True, blank=True, default="I am an Amazing Vendor")
 
     address = models.CharField(max_length=100, default="Legon Hall")

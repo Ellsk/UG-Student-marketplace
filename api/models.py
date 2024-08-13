@@ -60,7 +60,7 @@ class Vendor(models.Model):
     address = models.CharField(max_length=100, default="Legon Hall")
     contact = models.CharField(max_length=100, default="+233 (543) 789")
     chat_resp_time = models.CharField(max_length=100, default="100")
-    delivery_time = models.CharField(max_length=100, default="100")
+    shipping_on_time = models.CharField(max_length=100, default="100")
     authentic_rating = models.CharField(max_length=100, default="100")
     days_return = models.CharField(max_length=100, default="100")
     warranty_period = models.CharField(max_length=100, default="100")
@@ -93,6 +93,13 @@ class Product(models.Model):
     old_price = models.DecimalField(max_digits=15, decimal_places=2, default="2.99")
 
     specification = models.TextField(null=True, blank=True)
+    type = models.CharField(max_length=100, default="Organic", null=True, blank=True)  
+    stock_count = models.CharField(max_length=100, default="10", null=True, blank=True) 
+    life = models.CharField(max_length=100, default="100 Days", null=True, blank=True) 
+    mfd = models.DateTimeField(auto_now_add=False, null=True, blank=True) 
+
+
+    
     # tags = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)  # Linked to a Tag
 
     product_status = models.CharField(choices=STATUS, max_length=10, default="in_review")
@@ -125,7 +132,7 @@ class Product(models.Model):
 class ProductImages(models.Model):
     # Additional images for a product
     images = models.ImageField(upload_to="product-images", default="product.jpg")
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)  # Linked to a Product
+    product = models.ForeignKey(Product, related_name="p_images", on_delete=models.SET_NULL, null=True)  # Linked to a Product
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:

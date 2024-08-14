@@ -74,5 +74,21 @@ $(document).ready(function(){
             })
         })
         console.log(filter_object);
+    
+        $.ajax({
+            url: '/filter-product',
+            data: filter_object,
+            dataType: 'json',
+            beforeSend: function(){
+                $(".loader").show()
+            },
+            success: function(res){
+                console.log(res);
+            }
+            // $(".loader").show()
+            // }
+            // 1
+            })
+            
     })
 })

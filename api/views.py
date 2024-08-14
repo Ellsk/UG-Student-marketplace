@@ -235,3 +235,6 @@ def search_view(request):
     }
     
     return render(request, "core/search.html", context)
+
+def filter_product(request):
+    categories = request.GET['category[]']

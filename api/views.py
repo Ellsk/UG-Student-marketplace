@@ -182,29 +182,35 @@ def tag_list(request, tag_slug=None):
     return render(request, "core/tag.html", context)
 
 def ajax_add_review(request, pid):
-    product = Product.objects.get(pid=pid)
+    product = get_object_or_404(Product, pk=pid)
     user = request.user
-    
-    #Grabbing the text area input
-    review = ProductReview.objects.create(
-        user = user,
-        product = product,
-        review = request.POST['review'],
-        rating = request.POST['rating'],
-    )
-    
-    context = {
-        'user': user.id,
-        'review': request.POST['review'],
-        'rating': request.POST['rating'],
-    }
-    
-    average_rating = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))
 
-    return JsonResponse(
-        {
-            'bool': True,
-            'context': context,
-            'average_rating' : average_rating
-        }
-    )
+    if request.method == "POST":
+        review_text = request.POST.get('review')
+        rating = request.POST.get('rating')
+
+        if review_text and rating:
+            review = ProductReview.objects.create(
+                user=user,
+                product=product,
+                review=review_text,
+                rating=rating,
+            )
+
+            average_rating = ProductReview.objects.filter(product=product).aggregate(average_rating=Avg('rating'))['average_rating']
+            if average_rating is None:
+                average_rating = 0
+
+            return JsonResponse({
+                'bool': True,
+                'context': {
+                    'user': user.id,
+                    'review': review_text,
+                    'rating': rating,
+                },
+                'average_rating': round(average_rating, 1),
+            })
+
+        return JsonResponse({'bool': False, 'error': 'Invalid data'}, status=400)
+
+    return JsonResponse({'bool': False, 'error': 'Invalid method'}, status=405)

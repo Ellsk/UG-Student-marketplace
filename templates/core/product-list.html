@@ -28,7 +28,7 @@
                                         <ul>
                                             {% for c in categories %}
                                             <li>
-                                                <input class="form-check-input filter-checkbox" data-filter="category" type="checkbox" name="checkbox" id="exampleCheckbox1" value="{{c.id}}" />
+                                                <input class="form-check-input filter-checkbox" data-filter="category" type="checkbox" name="checkbox" id="exampleCheckbox2" value="{{c.id}}" />
                                                 &nbsp; &nbsp;
                                                 <a href="{% url 'api:category-product-list' c.cid%}"> <img src="{{c.image.url}}" alt="" />{{c.title}}</a>
                                             </li>
@@ -41,7 +41,7 @@
                                 <div class="card">
                                     <h5 class="mb-30">By Vendors</h5>
                                     <div class="d-flex">
-                                        <div class="custome-checkbox mr-80">
+                                        <div class="">
                                             {% for v in  vendors%}
                                                 <input class="form-check-input filter-checkbox" data-filter="vendor" type="checkbox" name="checkbox" id="exampleCheckbox1" value="{{v.id}}" />
                                                 <label class="form-check-label" for="exampleCheckbox1"><span>{{v.title}}</span></label>

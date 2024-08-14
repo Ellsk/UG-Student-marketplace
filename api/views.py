@@ -1,7 +1,9 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from taggit.models import Tag
+from django.db.models import Avg, Count 
 from api.models import Product, ProductImages, ProductReview, Wishlist, Address, CartOrder, Category, Vendor, CartOrderItems
+from api.forms import ProductReviewForm
 # Create your views here.
 
 def index(request):
@@ -116,10 +118,48 @@ def product_detail_view(request, pid):
     product = Product.objects.get(pid=pid)
     products = Product.objects.filter(category=product.category).exclude(pid=pid)
     
+    # Getting all reviews related to a product
+    reviews = ProductReview.objects.filter(product=product).order_by("-date")
+    
+    # Getting average rating
+    average_rating = ProductReview.objects.filter(product=product).aggregate(average_rating=Avg('rating'))['average_rating']
+    
+    # Handling case where there are no reviews
+    if average_rating is None:
+        average_rating = 0
+    
+    #Product Review Form
+    review_form = ProductReviewForm()
+    
+    
+    # Images
     p_image = product.p_images.all()
     
     context = {
         "product": product,
+        "review_form": review_form,
+        "average_rating": round(average_rating, 1),  # Round to 1 decimal place
+        "reviews": reviews,
+        "products": products,
+        "p_image": p_image,
+    }
+    
+    return render(request, "core/product-detail.html", context)
+    product = Product.objects.get(pid=pid)
+    products = Product.objects.filter(category=product.category).exclude(pid=pid)
+    
+    #Getting all review related to a product
+    reviews = ProductReview.objects.filter(product=product).order_by("-date")
+    
+    #Getting average review
+    average_rating = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))
+    #Images
+    p_image = product.p_images.all()
+    
+    context = {
+        "product": product,
+        "average_rating": average_rating,
+        "reviews": reviews,
         "products": products,
         "p_image": p_image,
     }
@@ -140,3 +180,31 @@ def tag_list(request, tag_slug=None):
     }
     
     return render(request, "core/tag.html", context)
+
+def ajax_add_review(request, pid):
+    product = Product.objects.get(pid=pid)
+    user = request.user
+    
+    #Grabbing the text area input
+    review = ProductReview.objects.create(
+        user = user,
+        product = product,
+        review = request.POST['review'],
+        rating = request.POST['rating'],
+    )
+    
+    context = {
+        'user': user.id,
+        'review': request.POST['review'],
+        'rating': request.POST['rating'],
+    }
+    
+    average_rating = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))
+
+    return JsonResponse(
+        {
+            'bool': True,
+            'context': context,
+            'average_rating' : average_rating
+        }
+    )

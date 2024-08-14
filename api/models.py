@@ -3,7 +3,7 @@ from shortuuid.django_fields import ShortUUIDField
 from django.utils.html import mark_safe
 from userauths.models import CustomUser
 from taggit.managers import TaggableManager
-
+from ckeditor_uploader.fields import RichTextUploadingField
 
 # TUPLES
 STATUS_CHOICE = [
@@ -57,7 +57,9 @@ class Vendor(models.Model):
     title = models.CharField(max_length=100, default="Nestify")  # Vendor Name
     image = models.ImageField(upload_to=user_directory_path, default="vendor.jpg")  # Vendor's image
     cover_image = models.ImageField(upload_to=user_directory_path, default="vendor.jpg")  # Vendor's image
-    description = models.TextField(null=True, blank=True, default="I am an Amazing Vendor")
+    #description = models.TextField(null=True, blank=True, default="I am an Amazing Vendor")
+    description = RichTextUploadingField(null=True, blank=True, default="I am an Amazing Vendor")
+
 
     address = models.CharField(max_length=100, default="Legon Hall")
     contact = models.CharField(max_length=100, default="+233 (543) 789")
@@ -84,7 +86,8 @@ class Product(models.Model):
     pid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="pd", alphabet="abcde12345")
     title = models.CharField(max_length=100, default="Nike")  # Product Title
     image = models.ImageField(upload_to=user_directory_path, default="product.jpg")  # Product image
-    description = models.TextField(null=True, blank=True, default="This is a product")
+    #description = models.TextField(null=True, blank=True, default="This is a product")
+    description = RichTextUploadingField(null=True, blank=True, default="This is a product")
 
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)  # Linked to a CustomUser
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="category")  # Linked to a Category
@@ -94,7 +97,8 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=15, decimal_places=2, default="1.99")
     old_price = models.DecimalField(max_digits=15, decimal_places=2, default="2.99")
 
-    specification = models.TextField(null=True, blank=True)
+    specification = RichTextUploadingField(null=True, blank=True)
+    #specification = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=100, default="Organic", null=True, blank=True)  
     stock_count = models.CharField(max_length=100, default="10", null=True, blank=True) 
     life = models.CharField(max_length=100, default="100 Days", null=True, blank=True) 
@@ -172,7 +176,7 @@ class CartOrderItems(models.Model):
 
 class ProductReview(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name="reviews")
     review = models.TextField()
     rating = models.IntegerField(choices=RATING, default=None)
     date = models.DateTimeField(auto_now_add=True)

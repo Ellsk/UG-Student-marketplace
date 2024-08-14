@@ -6,7 +6,7 @@
             <div class="container">
                 <div class="breadcrumb">
                     <a href="{% url 'api:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
-                    <span></span> <a href="shop-grid-right.html">Vegetables & tubers</a> <span></span> Seeds of Change Organic
+                    <span></span> <a href="shop-grid-right.html">{{product.category}}</a> <span></span> {{product.title}}
                 </div>
             </div>
         </div>
@@ -341,6 +341,10 @@
                                                     </div>
                                                 </div>
                                                 <!--comment form-->
+                                                
+                                            <!-- Checking to see if user already made a review-->
+                                                {% if make_review == True %}
+                                                {% if request.user.is_authenticated %}
                                                 <div class="comment-form">
                                                     <h4 class="mb-15 add_review">Add a review</h4>
                                                     <strong class="text-success" id="review-res">Review Added</strong>
@@ -384,6 +388,8 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                {% endif %}
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>

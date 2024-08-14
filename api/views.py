@@ -223,3 +223,15 @@ def ajax_add_review(request, pid):
         return JsonResponse({'bool': False, 'error': 'Invalid data'}, status=400)
 
     return JsonResponse({'bool': False, 'error': 'Invalid method'}, status=405)
+
+def search_view(request):
+    query = request.GET.get("q")
+    
+    products = Product.objects.filter(title__icontains=query).order_by("-date")
+    
+    context = {
+        "products": products,
+        'query': query,
+    }
+    
+    return render(request, "core/search.html", context)

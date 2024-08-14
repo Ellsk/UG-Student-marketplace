@@ -3,6 +3,7 @@ from api.models import Product, ProductImages, ProductReview, Wishlist, Address,
 
 def default(request):
     categories = Category.objects.all()
+    vendors = Vendor.objects.all()
     
     # Check if the user is authenticated before querying the address
     address = None
@@ -15,4 +16,5 @@ def default(request):
     return {
         'categories': categories,
         'address': address,
+        'vendors': vendors,
     }

@@ -274,15 +274,22 @@
                                                                                 {% endif %}
                                                                             </a>
                                                                         </div>
+
                                                                         <div class="desc">
                                                                             <div class="d-flex justify-content-between mb-10">
                                                                                 <div class="d-flex align-items-center">
                                                                                     <span class="font-xs text-muted">{{r.date|date:"d M,Y"}}</span>
                                                                                 </div>
-                                                                                &nbsp;
-                                                                                <div class="product-rate d-inline-block">
-                                                                                    <div class="product-rating" style="width: 100%"></div>
+                                                                                <div>
+                                                                                    {% for i in "12345" %}
+                                                                                        {% if forloop.counter <= r.rating %}
+                                                                                            <i class="fa fa-star text-warning"></i>
+                                                                                        {% else %}
+                                                                                            <i class="fa fa-star"></i>
+                                                                                        {% endif %}
+                                                                                    {% endfor %}
                                                                                 </div>
+                                                                                
                                                                             </div>
                                                                             <p class="mb-10">{{r.review}}</p>
                                                                         </div>
@@ -335,10 +342,11 @@
                                                 </div>
                                                 <!--comment form-->
                                                 <div class="comment-form">
-                                                    <h4 class="mb-15">Add a review</h4>
+                                                    <h4 class="mb-15 add_review">Add a review</h4>
+                                                    <strong class="text-success" id="review-res">Review Added</strong>
                                                     <div class="row">
                                                         <div class="col-lg-8 col-md-12">
-                                                            <form class="form-contact comment_form" action="{% url 'api:ajax-add-review' product.id %}" id="commentForm" method="POST">
+                                                            <form class="form-contact comment_form hide-comment-form" action="{% url 'api:ajax-add-review' product.id %}" id="commentForm" method="POST">
                                                                 {% csrf_token %}
                                                                 <div class="row">
                                                                     <div class="col-12">

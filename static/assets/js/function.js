@@ -59,36 +59,36 @@ $("#commentForm").submit(function(e){
 });
 
 $(document).ready(function(){
-    $(".loader").hide()
+    $(".loader").hide();
+
     $(".filter-checkbox").on("click", function(){
-    
-        let filter_object = {}
+        let filter_object = {};
 
         $(".filter-checkbox").each(function(index){
-            let filter_value = $(this).val()
-            let filter_key = $(this).data("filter") // vendor or category
-            console.log(filter_value, filter_key);
-            
-            filter_object[filter_key] = Array.from(document.querySelectorAll('input[data-filter='+filter_key+']:checked')).map(function(element){
-                return element.value
-            })
-        })
-        console.log(filter_object);
-    
+            let filter_key = $(this).data("filter");  // vendor or category
+            filter_object[filter_key] = Array.from(
+                document.querySelectorAll('input[data-filter=' + filter_key + ']:checked')
+            ).map(function(element){
+                return element.value;
+            });
+        });
+
         $.ajax({
-            url: '/filter-product',
+            url: '/filter-products',
             data: filter_object,
             dataType: 'json',
             beforeSend: function(){
-                $(".loader").show()
+                $(".loader").show();
             },
             success: function(res){
                 console.log(res);
+                $("#filtered-product").html(res.data);  // Update the product list with the filtered products
+                $(".loader").hide();
+            },
+            error: function(xhr, status, error){
+                console.log("Error:", status, error);
+                $(".loader").hide();
             }
-            // $(".loader").show()
-            // }
-            // 1
-            })
-            
-    })
-})
+        });
+    });
+});

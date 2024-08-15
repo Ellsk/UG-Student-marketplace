@@ -4,6 +4,7 @@ from taggit.models import Tag
 from django.db.models import Avg, Count 
 from api.models import Product, ProductImages, ProductReview, Wishlist, Address, CartOrder, Category, Vendor, CartOrderItems
 from api.forms import ProductReviewForm
+from django.template.loader import render_to_string
 # Create your views here.
 
 def index(request):
@@ -49,7 +50,6 @@ def category_product_list_view(request, cid):
     from django.http import HttpResponse
 from django.shortcuts import render
 from api.models import Product, ProductImages, ProductReview, Wishlist, Address, CartOrder, Category, Vendor, CartOrderItems
-# Create your views here.
 
 def index(request):
     #For displaying latest products
@@ -237,4 +237,22 @@ def search_view(request):
     return render(request, "core/search.html", context)
 
 def filter_product(request):
-    categories = request.GET['category[]']
+    # Get the selected categories and vendors
+    categories = request.GET.getlist('category[]')
+    vendors = request.GET.getlist('vendor[]')
+    
+    # Start with all published products
+    products = Product.objects.filter(product_status="published").distinct()
+    
+    # Filter by categories if any are selected
+    if len(categories) > 0:
+        products = products.filter(category__id__in=categories).distinct()
+    
+    # Filter by vendors if any are selected
+    if len(vendors) > 0:
+        products = products.filter(vendor__id__in=vendors).distinct()  # Corrected from category to vendor
+    
+    # Render the filtered products to the template
+    data = render_to_string('core/async/product-list.html', {'products': products})  # Corrected context
+    
+    return JsonResponse({'data': data})

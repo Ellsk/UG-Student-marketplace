@@ -1,6 +1,6 @@
 from django.urls import path 
 from api import views
-from api.views import ajax_add_review, index, product_list_view, category_list_view , category_product_list_view, search_view, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
+from api.views import ajax_add_review, filter_product, index, product_list_view, category_list_view , category_product_list_view, search_view, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
 
 
 app_name = "api"
@@ -27,4 +27,7 @@ urlpatterns = [
     
     #Search View
     path("search/", search_view, name="search"),
+    
+    #Filtered product
+    path("filter-products/", filter_product, name="filter-product"),
 ]

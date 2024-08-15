@@ -64,6 +64,9 @@ $(document).ready(function(){
     $(".filter-checkbox").on("click", function(){
         let filter_object = {};
 
+        let min_price = $("#max_price").attr("min")
+        let max_price = $("#max_price").val()
+
         $(".filter-checkbox").each(function(index){
             let filter_key = $(this).data("filter");  // vendor or category
             filter_object[filter_key] = Array.from(
@@ -91,4 +94,33 @@ $(document).ready(function(){
             }
         });
     });
+
+    $("#max_price").on("blur", function() {
+        // Getting the attr value from the product list
+        let min_price = parseInt($(this).attr("min"));
+        let max_price = parseInt($(this).attr("max"));
+        let current_price = parseInt($(this).val());
+    
+        if (current_price < min_price || current_price > max_price) {
+            // Round the prices to two decimal places if necessary
+            min_price = Math.round(min_price * 100) / 100;
+            max_price = Math.round(max_price * 100) / 100;
+    
+            // Show an alert with the price range
+            alert("Prices must be between " + min_price + " and " + max_price);
+    
+            // Set the value to the minimum price if out of range
+            $(this).val(min_price);
+            
+            $("#range").val(min_price)
+            // Focus back on the input field
+
+            $(this).focus();
+
+            return false;
+        }
+    });
 });
+
+
+//

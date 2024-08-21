@@ -131,7 +131,7 @@ $("#add-to-cart-btn").on("click", function(){
     let quantity = $("#product-quantity").val();  // Gets value from quantity input
     let product_title = $(".product-title").val();  // Gets value from title input
     let product_id = $(".product-id").val();  // Gets value from ID input
-    let product_price = $("#current-product-price").text()
+    let product_price = $("#current-product-price").text();
     let this_val = $(this);  // References the current button
 
     // Debugging
@@ -141,5 +141,31 @@ $("#add-to-cart-btn").on("click", function(){
     console.log("ID:", product_id);
     console.log("Current Element:", this_val);
 
-    
+    $.ajax({
+        url: '/add-to-cart',
+        data: {
+            'id': product_id,
+            'qty': quantity,
+            'title': product_title,
+            'price': product_price
+        },
+        dataType: 'json',
+        beforeSend: function(){
+            this_val.html("Adding To Cart");
+        },
+        success: function(response){
+            this_val.html("Added To Cart");
+
+            // Check for `totalcartitems` in response
+            if (response.totalcartitems !== undefined) {
+                $(".cart-items-count").text(response.totalcartitems);
+            } else {
+                console.error("totalcartitems not found in response:", response);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);  // Optional: Debugging errors
+            this_val.html("Error Adding To Cart");
+        }
+    });
 });

@@ -1,5 +1,5 @@
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from taggit.models import Tag
 from django.db.models import Avg, Count 
 from api.models import Product, ProductImages, ProductReview, Wishlist, Address, CartOrder, Category, Vendor, CartOrderItems
@@ -264,3 +264,38 @@ def filter_product(request):
     
     return JsonResponse({'data': data})
 
+from django.http import JsonResponse
+
+def add_to_cart(request):
+    cart_product = {}
+    
+    # Use 'id' as a string key to access the GET parameter
+    product_id = request.GET.get('id')
+    if not product_id:
+        return JsonResponse({'error': 'Product ID is required'}, status=400)
+    
+    cart_product[product_id] = {
+        'title': request.GET.get('title', ''),
+        'qty': int(request.GET.get('qty', 1)),
+        'price': float(request.GET.get('price', 0.0)),
+    }
+    
+    # The cart data refers to the whole products added to cart
+    if 'cart_data_obj' in request.session:
+        cart_data = request.session['cart_data_obj']
+        
+        # Checking if id already exists
+        if product_id in cart_data:
+            # Incrementing the existing product by updating the quantity
+            cart_data[product_id]['qty'] = int(cart_product[product_id]['qty'])
+        else:
+            cart_data.update(cart_product)
+        
+        request.session['cart_data_obj'] = cart_data
+    else:
+        request.session['cart_data_obj'] = cart_product
+    
+    # Calculate total cart items
+    total_cart_items = sum(item['qty'] for item in request.session.get('cart_data_obj', {}).values())
+    
+    return JsonResponse({"data": request.session['cart_data_obj'], 'totalcartitems': total_cart_items})

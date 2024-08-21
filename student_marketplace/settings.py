@@ -152,6 +152,7 @@ JAZZMIN_SETTINGS = {
     "search_model": "auth.User",
     # "user_avatar": "images/user-avatar.png",
 }
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 AUTH_USER_MODEL = 'userauths.CustomUser'
 

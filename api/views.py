@@ -246,7 +246,7 @@ def filter_product(request):
     max_price = request.GET['max_price']
     
     # Start with all published products
-    products = Product.objects.filter(product_status="published").distinct()
+    products = Product.objects.filter(product_status="published").order_by("-id").distinct()
     
     #Filtering the products based on min or max
     products = products.filter(price__gte=min_price)

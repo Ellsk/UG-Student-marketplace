@@ -61,11 +61,14 @@ $("#commentForm").submit(function(e){
 $(document).ready(function(){
     $(".loader").hide();
 
-    $(".filter-checkbox").on("click", function(){
+    $(".filter-checkbox, #price-filter-btn").on("click", function(){
         let filter_object = {};
 
         let min_price = $("#max_price").attr("min")
         let max_price = $("#max_price").val()
+
+        filter_object.min_price = min_price;
+        filter_object.max_price = max_price;
 
         $(".filter-checkbox").each(function(index){
             let filter_key = $(this).data("filter");  // vendor or category
@@ -123,4 +126,20 @@ $(document).ready(function(){
 });
 
 
-//
+// Add to cart functionality
+$("#add-to-cart-btn").on("click", function(){
+    let quantity = $("#product-quantity").val();  // Gets value from quantity input
+    let product_title = $(".product-title").val();  // Gets value from title input
+    let product_id = $(".product-id").val();  // Gets value from ID input
+    let product_price = $("#current-product-price").text()
+    let this_val = $(this);  // References the current button
+
+    // Debugging
+    console.log("Quantity:", quantity);
+    console.log("Title:", product_title);
+    console.log("Price:", product_price);
+    console.log("ID:", product_id);
+    console.log("Current Element:", this_val);
+
+    
+});

@@ -132,7 +132,7 @@ class Product(models.Model):
 
     def get_percentage(self):
         # Calculate and return the percentage discount between old price and new price
-        new_price = (self.price / self.old_price) * 100
+        new_price = ((self.old_price - self.price) / self.old_price) * 100 #Updated discount calculation
         return new_price
 
 class ProductImages(models.Model):

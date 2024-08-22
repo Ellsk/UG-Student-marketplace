@@ -156,7 +156,7 @@ $("#add-to-cart-btn").on("click", function(){
         success: function(response){
             this_val.html("Added To Cart");
 
-            // Check for `totalcartitems` in response
+            // Update the cart count
             if (response.totalcartitems !== undefined) {
                 $(".cart-items-count").text(response.totalcartitems);
             } else {
@@ -164,7 +164,7 @@ $("#add-to-cart-btn").on("click", function(){
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error:', error);  // Optional: Debugging errors
+            console.error('Error:', error);  // Debugging errors
             this_val.html("Error Adding To Cart");
         }
     });

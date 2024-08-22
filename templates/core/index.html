@@ -116,7 +116,12 @@
                                                         <span class="old-price"> ₵{{p.old_price}}</span>
                                                     </div>
                                                     <div class="add-cart">
-                                                        <a class="add" href="shop-cart.html"><i class="fi-rs-shopping-cart mr-5"></i>Add </a>
+                                                        <input type="hidden" value="1" id="product-quantity" class="product-quantity-{{ p.id }}"/>
+                                                        <input type="hidden" value="{{p.pid}}" class="product-pid-{{ p.id }}"/>
+                                                        <input type="hidden" value="{{ p.image.url }}" class="product-image-{{ p.id }}"/>
+                                                        <input type="hidden" value="{{ p.id }}" class="product-id-{{ p.id }}"/>
+                                                        <input type="hidden" value="{{ p.title }}" class="product-title-{{ p.id }}"/>
+                                                        <button class="add add-to-cart-btn b-none" data-index="{{ p.id }}"><i class="fi-rs-shopping-cart mr-5" id="add-to-cart-btn"></i>Add </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2998,7 +3003,7 @@
                         {% for c in categories %}
                         <ul>
                             <li>
-                                <a href=""> <img src="{{c.image.url}}" alt="" />{{c.title}}</a><span class="count">{{c.category.all.count}}</span>
+                                <a href="{% url 'api:category-product-list' c.cid %}"> <img src="{{c.image.url}}" alt="" />{{c.title}}</a><span class="count">{{c.category.all.count}}</span>
                             </li>
                         </ul>
                         {% endfor %}

@@ -287,7 +287,7 @@ def add_to_cart(request):
         # Checking if id already exists
         if product_id in cart_data:
             # Incrementing the existing product by updating the quantity
-            cart_data[product_id]['qty'] = int(cart_product[product_id]['qty'])
+            cart_data[product_id]['qty'] += int(cart_product[product_id]['qty'])
         else:
             cart_data.update(cart_product)
         
@@ -297,5 +297,8 @@ def add_to_cart(request):
     
     # Calculate total cart items
     total_cart_items = sum(item['qty'] for item in request.session.get('cart_data_obj', {}).values())
+    
+    # Set the session as modified to ensure the changes are saved
+    request.session.modified = True
     
     return JsonResponse({"data": request.session['cart_data_obj'], 'totalcartitems': total_cart_items})

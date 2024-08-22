@@ -427,17 +427,6 @@
                                                             <span class="hot">-{{p.get_percentage|floatformat:0}}%</span>
                                                         </div>
                                                     </div>
-                                                    {% comment %} Removed this and worked!! 
-                                                    <div class="product-content-wrap">
-                                                        <h2><a href="{% url 'api:product-detail' p.pid %}" tabindex="0">{{p.title|truncatechars:20}}</a></h2>
-                                                        <div class="rating-result" title="90%">
-                                                            <span> </span>
-                                                        </div>
-                                                        <div class="product-price">
-                                                            <span> ₵</span><span class="current-product-price-{{ product.id }}">{{ p.price }}</span>
-                                                            <span class="old-price"> ₵{{ p.old_price }}</span>
-                                                        </div>
-                                                    </div> {% endcomment %}
                                                 </div>
                                             </div>
                                             {% endfor %}

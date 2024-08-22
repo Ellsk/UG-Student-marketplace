@@ -125,26 +125,47 @@ $(document).ready(function(){
     });
 });
 
+// $(".add-to-cart-btn").on("click", function(){
+//     let this_val = $(this)
+//     let index = this_val.attr("data-index")
+//     let quantity = $(".product-quantity-"+_index).val()
+//     let product_title = $(".product-title-"+_index).val()
+//     let product_image = $(".product-image-"+_index).val()
+//     let product_pid = $(".product-pid-"+_index).val()
+//     let product_id = $(".product-id-"+_index).val()
+//     let product_price = $(".current-product-price-"+_index).text()
 
-// Add to cart functionality
-$("#add-to-cart-btn").on("click", function(){
-    let quantity = $("#product-quantity").val();  // Gets value from quantity input
-    let product_title = $(".product-title").val();  // Gets value from title input
-    let product_id = $(".product-id").val();  // Gets value from ID input
-    let product_price = $("#current-product-price").text();
-    let this_val = $(this);  // References the current button
+//     beforeSend:function(){
+//         this_val.html("✓")
+//     },
+//Add to cart functionality
+$(".add-to-cart-btn").on("click", function(){
+    let this_val = $(this);
+    let _index = this_val.attr("data-index");
+
+    let quantity = $(".product-quantity-" + _index).val();
+    let product_title = $(".product-title-" + _index).val();
+    let product_image = $(".product-image-" + _index).val();
+    let product_pid = $(".product-pid-" + _index).val();
+    let product_id = $(".product-id-" + _index).val();
+    let product_price = $(".current-product-price-" + _index).text();
 
     // Debugging
     console.log("Quantity:", quantity);
     console.log("Title:", product_title);
     console.log("Price:", product_price);
     console.log("ID:", product_id);
+    console.log("Image:", product_image);
+    console.log("PID:", product_pid);
+    console.log("Index:", _index);
     console.log("Current Element:", this_val);
 
     $.ajax({
         url: '/add-to-cart',
         data: {
             'id': product_id,
+            'pid': product_pid,
+            'image': product_image,
             'qty': quantity,
             'title': product_title,
             'price': product_price
@@ -154,16 +175,21 @@ $("#add-to-cart-btn").on("click", function(){
             this_val.html("Adding To Cart");
         },
         success: function(response){
-            this_val.html("Added To Cart");
-
+            this_val.html("✓");
+            
             // Update the cart count
             if (response.totalcartitems !== undefined) {
                 $(".cart-items-count").text(response.totalcartitems);
             } else {
                 console.error("totalcartitems not found in response:", response);
             }
+
+            // Revert back to "Add to Cart" after a short delay
+            setTimeout(function() {
+                this_val.html('<i class="fi-rs-shopping-cart mr-5"></i>Add');
+            }, 2000);
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('Error:', error);  // Debugging errors
             this_val.html("Error Adding To Cart");
         }

@@ -153,26 +153,6 @@ def product_detail_view(request, pid):
     }
     
     return render(request, "core/product-detail.html", context)
-    product = Product.objects.get(pid=pid)
-    products = Product.objects.filter(category=product.category).exclude(pid=pid)
-    
-    #Getting all review related to a product
-    reviews = ProductReview.objects.filter(product=product).order_by("-date")
-    
-    #Getting average review
-    average_rating = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))
-    #Images
-    p_image = product.p_images.all()
-    
-    context = {
-        "product": product,
-        "average_rating": average_rating,
-        "reviews": reviews,
-        "products": products,
-        "p_image": p_image,
-    }
-    
-    return render(request, "core/product-detail.html", context)
 
 def tag_list(request, tag_slug=None):
     products = Product.objects.filter(product_status="published").order_by("-id")
@@ -264,8 +244,6 @@ def filter_product(request):
     
     return JsonResponse({'data': data})
 
-from django.http import JsonResponse
-
 def add_to_cart(request):
     cart_product = {}
     
@@ -274,10 +252,27 @@ def add_to_cart(request):
     if not product_id:
         return JsonResponse({'error': 'Product ID is required'}, status=400)
     
+    title = request.GET.get('title')
+    qty = request.GET.get('qty')
+    price = request.GET.get('price')
+    image = request.GET.get('image')
+    pid = request.GET.get('pid')
+    
+    # Ensure that the required parameters are present
+    if not all([title, qty, price, image, pid]):
+        return JsonResponse({'error': 'Missing parameters'}, status=400)
+    
+    try:
+        price = float(price)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid price format'}, status=400)
+    
     cart_product[product_id] = {
-        'title': request.GET.get('title', ''),
-        'qty': int(request.GET.get('qty', 1)),
-        'price': float(request.GET.get('price', 0.0)),
+        'title': title,
+        'qty': int(qty),
+        'price': price,
+        'image': image,
+        'pid': pid,
     }
     
     # The cart data refers to the whole products added to cart

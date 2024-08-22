@@ -243,11 +243,16 @@
                                     <div class="product-card-bottom">
                                         <!-- Price -->
                                         <div class="product-price">
-                                            <span> ₵{{p.price}}</span>
+                                            <span> ₵</span><span class="current-product-price-{{ p.id }}">{{p.price}}</span>
                                             <span class="old-price"> ₵{{p.old_price}}</span>
                                         </div>
                                         <div class="add-cart">
-                                            <a class="add" href="shop-cart.html"><i class="fi-rs-shopping-cart mr-5"></i>Add </a>
+                                            <input type="hidden" value="1" id="product-quantity" class="product-quantity-{{ p.id }}"/>
+                                            <input type="hidden" value="{{p.pid}}" class="product-pid-{{ p.id }}"/>
+                                            <input type="hidden" value="{{ p.image.url }}" class="product-image-{{ p.id }}"/>
+                                            <input type="hidden" value="{{ p.id }}" class="product-id-{{ p.id }}"/>
+                                            <input type="hidden" value="{{ p.title }}" class="product-title-{{ p.id }}"/>
+                                            <button class="add add-to-cart-btn b-none" data-index="{{ p.id }}"><i class="fi-rs-shopping-cart mr-5" id="add-to-cart-btn"></i>Add </button>
                                         </div>
                                     </div>
                                 </div>

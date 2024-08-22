@@ -5,7 +5,7 @@ from django.db.models import Avg, Count
 from api.models import Product, ProductImages, ProductReview, Wishlist, Address, CartOrder, Category, Vendor, CartOrderItems
 from api.forms import ProductReviewForm
 from django.template.loader import render_to_string
-
+from django.contrib import messages
 # Create your views here.
 
 def index(request):
@@ -297,3 +297,15 @@ def add_to_cart(request):
     request.session.modified = True
     
     return JsonResponse({"data": request.session['cart_data_obj'], 'totalcartitems': total_cart_items})
+
+def cart_view(request):
+    cart_total_amount = 0
+    total_cart_items = sum(item['qty'] for item in request.session.get('cart_data_obj', {}).values())
+
+    if 'cart_data_obj' in request.session:
+        for p_id, item in request.session['cart_data_obj'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
+        return render(request, "core/cart.html", {"cart_data": request.session['cart_data_obj'], 'totalcartitems': total_cart_items, 'cart_total_amount': cart_total_amount})
+    else:
+        messages.warning(request,"Your cart is empty")
+        return render(request, "core/cart.html", {"cart_data": "", 'totalcartitems': total_cart_items, 'cart_total_amount': cart_total_amount})

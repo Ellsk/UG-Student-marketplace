@@ -47,7 +47,10 @@ INSTALLED_APPS = [
     #custom apps
     'api',
     'userauths',
-]
+    
+    #Paypal integration
+    'paypal.standard.ipn'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

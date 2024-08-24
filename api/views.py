@@ -246,3 +246,25 @@ def update_cart(request):
             return JsonResponse({"cart_html": context, 'totalcartitems': total_cart_items})
         
     return JsonResponse({"error": "Product not found in cart"}, status=404)
+
+from django.shortcuts import render
+
+def checkout_view(request):
+    if 'cart_data_obj' in request.session:
+        cart_data = request.session['cart_data_obj']
+        cart_total_amount = sum(
+            int(item.get('qty', 0)) * float(item.get('price', 0.0)) for item in cart_data.values()
+        )
+        total_cart_items = sum(int(item.get('qty', 0)) for item in cart_data.values())
+
+        return render(request, 'core/checkout.html', {
+            'cart_data': cart_data, 
+            'cart_total_amount': cart_total_amount,
+            'total_cart_items': total_cart_items
+        })
+    else:
+        # Handle case where the cart is empty or not found
+        return render(request, 'core/checkout.html', {
+            'cart_data': {}, 
+            'cart_total_amount': 0
+        })

@@ -1,6 +1,6 @@
 from django.urls import path 
 from api import views
-from api.views import add_to_cart, ajax_add_review, cart_view, filter_product, index, product_list_view, category_list_view , category_product_list_view, search_view, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
+from api.views import add_to_cart, ajax_add_review, cart_view, delete_item_from_cart, filter_product, index, product_list_view, category_list_view , category_product_list_view, search_view, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
 
 
 app_name = "api"
@@ -34,4 +34,6 @@ urlpatterns = [
     path("add-to-cart/", add_to_cart, name="add-to-cart"),
     
     path("cart/", cart_view, name="cart"),
+    
+    path("delete-from-cart/", delete_item_from_cart, name="delete-from-cart"),
 ]

@@ -4,7 +4,7 @@
 {% block content %}
     <main class="main">
         <div class="page-header breadcrumb-wrap">
-            <div class="container">
+            <div class="container" id="cart_list">
                 <div class="breadcrumb">
                     <a href="index.html" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
                     <span></span> Shop
@@ -71,15 +71,19 @@
                                         <h4 class="text-brand">₵{% widthratio item.price 1 item.qty%} </h4>
                                     </td>
                                     <td class="action text-center" data-title="Refresh"><a href="#" class="text-body"><i class="fi-rs-refresh"></i></a></td>
-                                    <td class="action text-center" data-title="Remove"><a href="#" class="text-body"><i class="fi-rs-trash"></i></a></td>
-                                </tr>
+                                    <td class="action text-center" data-title="Remove">
+                                        <button style="border:none; background:none;" class="text-body delete-product" data-product="{{product_id}}">
+                                            <i class="fi-rs-trash"></i>
+                                        </button>
+                                    </td>
+                                    </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                     <div class="divider-2 mb-30"></div>
                     <div class="cart-action d-flex justify-content-between">
-                        <a class="btn "><i class="fi-rs-arrow-left mr-10"></i>Continue Shopping</a>
+                        <a href="{% url 'api:index' %}"class="btn "><i class="fi-rs-arrow-left mr-10"></i>Continue Shopping</a>
                         <a class="btn  mr-10 mb-sm-15"><i class="fi-rs-refresh mr-10"></i>Update Cart</a>
                     </div>
                     <div class="row mt-50">
@@ -92,6 +96,7 @@
                                         <div class="form-group col-lg-12">
                                             <div class="custom_select">
                                                 <select class="form-control select-active w-100">
+                                                    {% comment %} Change these locations to Halls {% endcomment %}
                                                     <option value="">United Kingdom</option>
                                                     <option value="AX">Aland Islands</option>
                                                     <option value="AF">Afghanistan</option>

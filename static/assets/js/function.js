@@ -136,16 +136,6 @@ $(document).ready(function(){
         let product_id = $(".product-id-" + _index).val();
         let product_price = $(".current-product-price-" + _index).text();
     
-        // Debugging
-        console.log("Quantity:", quantity);
-        console.log("Title:", product_title);
-        console.log("Price:", product_price);
-        console.log("ID:", product_id);
-        console.log("Image:", product_image);
-        console.log("PID:", product_pid);
-        console.log("Index:", _index);
-        console.log("Current Element:", this_val);
-    
         $.ajax({
             url: '/add-to-cart',
             data: {
@@ -162,7 +152,7 @@ $(document).ready(function(){
             },
             success: function(response){
                 this_val.html("✓");
-                
+    
                 // Update the cart count
                 if (response.totalcartitems !== undefined) {
                     $(".cart-items-count").text(response.totalcartitems);
@@ -170,46 +160,77 @@ $(document).ready(function(){
                     console.error("totalcartitems not found in response:", response);
                 }
     
+                // Re-render the cart list dynamically without refreshing
+                $("#cartList").html(response.cart_html);
+    
                 // Revert back to "Add to Cart" after a short delay
                 setTimeout(function() {
                     this_val.html('<i class="fi-rs-shopping-cart mr-5"></i>Add');
-                }, 2000);
+                }.bind(this_val), 2000); // Using .bind to maintain the context
+                
             },
             error: function (xhr, status, error) {
-                console.error('Error:', error);  // Debugging errors
+                console.error('Error:', error);
                 this_val.html("Error Adding To Cart");
             }
         });
     });
-    
+        
     $(document).on("click", ".delete-product", function(){
-    let product_id = $(this).attr("data-product");
-    let this_val = $(this);
-
-    console.log("Product ID:", product_id);
-
-    $.ajax({
-        url: '/delete-from-cart/',
-        data: {
-            'id': product_id,
-        },
-        dataType: 'json',
-        beforeSend: function(){
-            this_val.attr('disabled', true);
-        },
-        success: function(response){
-            console.log(response);
-            // Update the cart item count and re-render the cart list
-            $(".cart-items-count").text(response.totalcartitems);
-            $("#cartList").html(response.data);
-            this_val.attr('disabled', false);
-        },
-        error: function(xhr, status, error) {
-            console.error("Error:", error);
-            this_val.attr('disabled', false);
-        }
+        let product_id = $(this).attr("data-product");
+        let this_val = $(this);
+    
+        $.ajax({
+            url: '/delete-from-cart/',
+            data: {
+                'id': product_id,
+            },
+            dataType: 'json',
+            beforeSend: function(){
+                this_val.attr('disabled', true);
+            },
+            success: function(response){
+                console.log(response);
+                // Update the cart item count and re-render the cart list
+                $(".cart-items-count").text(response.totalcartitems);
+                $("#cartList").html(response.cart_html);
+                this_val.attr('disabled', false);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+                this_val.attr('disabled', false);
+            }
+        });
     });
-});
+    
+    $(document).on("click", ".update-product", function(){
+        let product_id = $(this).attr("data-product");
+        let this_val = $(this);
+        let product_quantity = $(".product-qty"+product_id).val()
+    
+        $.ajax({
+            url: '/update-cart/',
+            data: {
+                'id': product_id,
+                'qty': product_quantity,
+            },
+            dataType: 'json',
+            beforeSend: function(){
+                this_val.attr('disabled', true);
+            },
+            success: function(response){
+                console.log(response);
+                // Update the cart item count and re-render the cart list
+                $(".cart-items-count").text(response.totalcartitems);
+                $("#cartList").html(response.cart_html);
+                this_val.attr('disabled', false);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+                this_val.attr('disabled', false);
+            }
+        });
+    });
 
 });
 

@@ -1,4 +1,4 @@
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from taggit.models import Tag
 from django.db.models import Avg, Count 
@@ -7,120 +7,95 @@ from api.forms import ProductReviewForm
 from django.template.loader import render_to_string
 from django.contrib import messages
 
-# Create your views here.
-
+# Index view for displaying latest products
 def index(request):
-    product = Product.objects.filter(featured=True, product_status="published")
-    context = {
-        "products": product
-    }
+    products = Product.objects.filter(featured=True, product_status="published")
+    context = {"products": products}
     return render(request, "core/index.html", context)
 
+# View to list all published products
 def product_list_view(request):
-    product = Product.objects.filter(product_status="published")
-    context = {
-        "products": product
-    }
+    products = Product.objects.filter(product_status="published")
+    context = {"products": products}
     return render(request, "core/product-list.html", context)
 
-def category_list_view(request):    
+# View to list all categories
+def category_list_view(request):
     categories = Category.objects.all()
-    context = {
-        "categories": categories
-    }
+    context = {"categories": categories}
     return render(request, "core/category-list.html", context)
 
+# View to list products in a specific category
 def category_product_list_view(request, cid):
     category = get_object_or_404(Category, cid=cid)
     products = Product.objects.filter(category=category, product_status="published")
-    context = {
-        "category": category,
-        "products": products
-    }
+    context = {"category": category, "products": products}
     return render(request, "core/category-product-list.html", context)
 
+# View to list all vendors
 def vendor_list_view(request):
     vendors = Vendor.objects.all()
-    context = {
-        "vendors": vendors,
-    }
+    context = {"vendors": vendors}
     return render(request, "core/vendor-list.html", context)
 
+# View to show details of a specific vendor and their products
 def vendor_detail_view(request, vid):
     vendor = get_object_or_404(Vendor, vid=vid)
     products = Product.objects.filter(vendor=vendor, product_status="published")
-    context = {
-        "vendor": vendor,
-        "products": products,
-    }
+    context = {"vendor": vendor, "products": products}
     return render(request, "core/vendor-detail.html", context)
 
+# View to show details of a specific product and related products
 def product_detail_view(request, pid):
     product = get_object_or_404(Product, pid=pid)
-    products = Product.objects.filter(category=product.category).exclude(pid=pid)
-    
+    related_products = Product.objects.filter(category=product.category, product_status="published").exclude(pid=pid)
     reviews = ProductReview.objects.filter(product=product).order_by("-date")
     average_rating = ProductReview.objects.filter(product=product).aggregate(average_rating=Avg('rating'))['average_rating'] or 0
-    
     review_form = ProductReviewForm()
-    make_review = True
-    
-    if request.user.is_authenticated:
-        if ProductReview.objects.filter(user=request.user, product=product).exists():
-            make_review = False
-            
-    p_image = product.p_images.all()
-    
+    make_review = request.user.is_authenticated and not ProductReview.objects.filter(user=request.user, product=product).exists()
+    p_images = product.p_images.all()
+
     context = {
         "product": product,
         "make_review": make_review,
         "review_form": review_form,
         "average_rating": round(average_rating, 1),
         "reviews": reviews,
-        "products": products,
-        "p_image": p_image,
+        "products": related_products,
+        "p_images": p_images,
     }
     return render(request, "core/product-detail.html", context)
 
+# View to list products based on tags
 def tag_list(request, tag_slug=None):
     products = Product.objects.filter(product_status="published").order_by("-id")
     tag = None
     if tag_slug:
         tag = get_object_or_404(Tag, slug=tag_slug)
         products = products.filter(tags__in=[tag])
-    context = {
-        "products": products,
-        "tag": tag,
-    }
+
+    context = {"products": products, "tag": tag}
     return render(request, "core/tag.html", context)
 
+# AJAX view to add a review
 def ajax_add_review(request, pid):
     product = get_object_or_404(Product, pk=pid)
-    user = request.user
-
     if request.method == "POST":
         review_text = request.POST.get('review')
         rating = request.POST.get('rating')
 
         if review_text and rating:
-            try:
-                rating = float(rating)
-            except ValueError:
-                return JsonResponse({'bool': False, 'error': 'Invalid rating value'}, status=400)
-
             review = ProductReview.objects.create(
-                user=user,
+                user=request.user,
                 product=product,
                 review=review_text,
                 rating=rating,
             )
-
             average_rating = ProductReview.objects.filter(product=product).aggregate(average_rating=Avg('rating'))['average_rating'] or 0
-
             return JsonResponse({
                 'bool': True,
                 'context': {
-                    'user': user.id,
+                    'user': request.user.id,
                     'review': review_text,
                     'rating': rating,
                 },
@@ -131,137 +106,110 @@ def ajax_add_review(request, pid):
 
     return JsonResponse({'bool': False, 'error': 'Invalid method'}, status=405)
 
+# Search view
 def search_view(request):
-    query = request.GET.get("q")
+    query = request.GET.get("q", "")
     products = Product.objects.filter(title__icontains=query).order_by("-date")
-    context = {
-        "products": products,
-        'query': query,
-    }
+    context = {"products": products, 'query': query}
     return render(request, "core/search.html", context)
 
+# View to filter products by category, vendor, and price
 def filter_product(request):
     categories = request.GET.getlist('category[]')
     vendors = request.GET.getlist('vendor[]')
     min_price = request.GET.get('min_price', 0)
-    max_price = request.GET.get('max_price', 1000000)  # Set a reasonable default if not provided
-    
+    max_price = request.GET.get('max_price', 1000000)
+
     products = Product.objects.filter(product_status="published").order_by("-id").distinct()
-    
-    if min_price:
-        products = products.filter(price__gte=min_price)
-    if max_price:
-        products = products.filter(price__lte=max_price)
-    
+    products = products.filter(price__gte=min_price, price__lte=max_price)
+
     if categories:
         products = products.filter(category__id__in=categories).distinct()
-    
     if vendors:
         products = products.filter(vendor__id__in=vendors).distinct()
-    
+
     data = render_to_string('core/async/product-list.html', {'products': products})
     return JsonResponse({'data': data})
 
+# View to add a product to the cart
 def add_to_cart(request):
-    cart_product = {}
-    
     product_id = request.GET.get('id')
     if not product_id:
         return JsonResponse({'error': 'Product ID is required'}, status=400)
-    
+
     title = request.GET.get('title')
-    qty = request.GET.get('qty')
+    qty = request.GET.get('qty', 1)
     price = request.GET.get('price')
     image = request.GET.get('image')
     pid = request.GET.get('pid')
-    
-    if not all([title, qty, price, image, pid]):
+
+    if not all([title, price, image, pid]):
         return JsonResponse({'error': 'Missing parameters'}, status=400)
-    
+
     try:
+        qty = int(qty)
         price = float(price)
     except ValueError:
-        return JsonResponse({'error': 'Invalid price format'}, status=400)
-    
-    cart_product[product_id] = {
-        'title': title,
-        'qty': int(qty),
-        'price': price,
-        'image': image,
-        'pid': pid,
+        return JsonResponse({'error': 'Invalid quantity or price format'}, status=400)
+
+    cart_product = {
+        product_id: {
+            'title': title,
+            'qty': qty,
+            'price': price,
+            'image': image,
+            'pid': pid,
+        }
     }
-    
-    if 'cart_data_obj' in request.session:
-        cart_data = request.session['cart_data_obj']
-        if product_id in cart_data:
-            cart_data[product_id]['qty'] += int(cart_product[product_id]['qty'])
-        else:
-            cart_data.update(cart_product)
-        request.session['cart_data_obj'] = cart_data
+
+    cart_data = request.session.get('cart_data_obj', {})
+    if product_id in cart_data:
+        cart_data[product_id]['qty'] += qty
     else:
-        request.session['cart_data_obj'] = cart_product
-    
-    total_cart_items = sum(item['qty'] for item in request.session.get('cart_data_obj', {}).values())
+        cart_data.update(cart_product)
+
+    request.session['cart_data_obj'] = cart_data
     request.session.modified = True
-    
+
+    total_cart_items = sum(int(item['qty']) for item in request.session.get('cart_data_obj', {}).values())
     return JsonResponse({"data": request.session['cart_data_obj'], 'totalcartitems': total_cart_items})
 
+# View to display the cart and recalculate the total price
 def cart_view(request):
-    cart_total_amount = 0
-    total_cart_items = sum(item['qty'] for item in request.session.get('cart_data_obj', {}).values())
+    cart_total_amount = 0.0
+    total_cart_items = 0
+    cart_data = request.session.get('cart_data_obj', {})
 
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            cart_total_amount += int(item['qty']) * float(item['price'])
-        return render(request, "core/cart.html", {"cart_data": request.session['cart_data_obj'], 'totalcartitems': total_cart_items, 'cart_total_amount': cart_total_amount})
-    else:
-        messages.warning(request,"Your cart is empty")
-        return render(request, "core/cart.html", {"cart_data": "", 'totalcartitems': total_cart_items, 'cart_total_amount': cart_total_amount})
+    for item in cart_data.values():
+        cart_total_amount += int(item['qty']) * float(item['price'])
+        total_cart_items += int(item['qty'])
 
+    if not cart_data:
+        messages.warning(request, "Your cart is empty")
+
+    context = {
+        "cart_data": cart_data,
+        'totalcartitems': total_cart_items,
+        'cart_total_amount': cart_total_amount,
+    }
+    return render(request, "core/cart.html", context)
+
+# View to delete an item from the cart
 def delete_item_from_cart(request):
     product_id = str(request.GET.get('id'))
     if 'cart_data_obj' in request.session:
-        if product_id in request.session['cart_data_obj']:
-            cart_data = request.session['cart_data_obj']
-            del request.session['cart_data_obj'][product_id]
+        cart_data = request.session['cart_data_obj']
+        if product_id in cart_data:
+            del cart_data[product_id]
             request.session['cart_data_obj'] = cart_data
-            
-    cart_total_amount = 0
-    total_cart_items = sum(item['qty'] for item in request.session.get('cart_data_obj', {}).values())
+            request.session.modified = True
 
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            cart_total_amount += int(item['qty']) * float(item['price'])
+    total_cart_items = sum(item['qty'] for item in cart_data.values())
+    cart_total_amount = sum(int(item['qty']) * float(item['price']) for item in cart_data.values())
 
-    return JsonResponse({"data": request.session['cart_data_obj'], 'totalcartitems': total_cart_items, 'cart_total_amount': cart_total_amount})
-
-def wishlist_view(request):
-    wishlist = Wishlist.objects.filter(user=request.user).order_by("-id")
-    context = {"wishlist": wishlist}
-    return render(request, "core/wishlist.html", context)
-
-def ajax_add_to_wishlist(request):
-    pid = request.GET.get("product")
-    product = Product.objects.get(pid=pid)
-    check_wishlist = Wishlist.objects.filter(product=product, user=request.user).count()
-    if check_wishlist > 0:
-        return JsonResponse({"bool": False})
-    else:
-        wishlist = Wishlist.objects.create(product=product, user=request.user)
-        return JsonResponse({"bool": True})
-
-def delete_item_from_wishlist(request):
-    product_id = request.GET.get("id")
-    Wishlist.objects.filter(product_id=product_id, user=request.user).delete()
-    wishlist = Wishlist.objects.filter(user=request.user).order_by("-id")
-    context = {"wishlist": wishlist}
-    return render(request, "core/ajax-wishlist.html", context)
-
-def search_address(request):
-    if 'term' in request.GET:
-        qs = Address.objects.filter(name__icontains=request.GET.get('term'))
-        titles = list()
-        for address in qs:
-            titles.append(address.name)
-        return JsonResponse(titles, safe=False)
-
+    context = render_to_string('core/async/cart-list.html', {
+        "cart_data": cart_data, 
+        'totalcartitems': total_cart_items, 
+        'cart_total_amount': cart_total_amount
+    })
+    return JsonResponse({"data": context, 'totalcartitems': total_cart_items})

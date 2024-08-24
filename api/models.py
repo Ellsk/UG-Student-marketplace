@@ -185,10 +185,15 @@ class ProductReview(models.Model):
         verbose_name_plural = "Product Reviews"
 
     def __str__(self):
-        return self.product.title
+        # Check if the product is None to avoid AttributeError
+        if self.product:
+            return self.product.title
+        else:
+            return "No Product"  # Or any default string you prefer
 
     def get_rating(self):
         return self.rating
+
 
 class Wishlist(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)

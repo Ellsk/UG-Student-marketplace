@@ -213,3 +213,36 @@ def delete_item_from_cart(request):
         'cart_total_amount': cart_total_amount
     })
     return JsonResponse({"data": context, 'totalcartitems': total_cart_items})
+
+def update_cart(request):
+    product_id = str(request.GET.get('id'))
+    product_qty = request.GET.get('qty')
+    
+    # Debugging print statements
+    print(f"Received product_id: {product_id}")
+    print(f"Received product_qty: {product_qty}")
+    
+    if not product_qty or not product_qty.isdigit():
+        print("Invalid quantity received.")
+        return JsonResponse({"error": "Invalid quantity"}, status=400)
+    
+    product_qty = int(product_qty)
+
+    if 'cart_data_obj' in request.session:
+        cart_data = request.session['cart_data_obj']
+        if product_id in cart_data:
+            cart_data[product_id]['qty'] = product_qty
+            request.session.modified = True
+
+            total_cart_items = sum(int(item.get('qty', 0)) for item in cart_data.values())
+            cart_total_amount = sum(int(item.get('qty', 0)) * float(item.get('price', 0.0)) for item in cart_data.values())
+
+            context = render_to_string('core/async/cart-list.html', {
+                "cart_data": cart_data, 
+                'totalcartitems': total_cart_items, 
+                'cart_total_amount': cart_total_amount
+            })
+
+            return JsonResponse({"cart_html": context, 'totalcartitems': total_cart_items})
+        
+    return JsonResponse({"error": "Product not found in cart"}, status=404)

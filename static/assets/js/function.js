@@ -206,7 +206,11 @@ $(document).ready(function(){
     $(document).on("click", ".update-product", function(){
         let product_id = $(this).attr("data-product");
         let this_val = $(this);
-        let product_quantity = $(".product-qty"+product_id).val()
+        let product_quantity = $(".product-qty-" + product_id).val();
+    
+        // Debugging console logs
+        console.log("Product ID:", product_id);
+        console.log("Product Quantity:", product_quantity);
     
         $.ajax({
             url: '/update-cart/',
@@ -220,7 +224,6 @@ $(document).ready(function(){
             },
             success: function(response){
                 console.log(response);
-                // Update the cart item count and re-render the cart list
                 $(".cart-items-count").text(response.totalcartitems);
                 $("#cartList").html(response.cart_html);
                 this_val.attr('disabled', false);
@@ -231,6 +234,5 @@ $(document).ready(function(){
             }
         });
     });
-
 });
 

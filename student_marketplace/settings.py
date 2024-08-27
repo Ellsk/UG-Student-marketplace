@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'userauths',
     
     #Paypal integration
-    'paypal.standard.ipn'
+    'paypal.standard.ipn',
+]
 
 
 MIDDLEWARE = [
@@ -155,6 +156,9 @@ JAZZMIN_SETTINGS = {
     "search_model": "auth.User",
     # "user_avatar": "images/user-avatar.png",
 }
+
+LOGIN_URL = 'userauths:sign-in'
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 AUTH_USER_MODEL = 'userauths.CustomUser'
@@ -175,3 +179,7 @@ CKEDITOR_CONFIGS = {
         ),
     },
 }
+
+PAYPAL_RECEIVER_EMAIL = 'kumedzroelliot30@gmail.com'
+#For testing, when live Test = False
+PAYPAL_TEST = True

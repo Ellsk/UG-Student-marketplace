@@ -1,6 +1,6 @@
-from django.urls import path 
+from django.urls import include, path 
 from api import views
-from api.views import add_to_cart, ajax_add_review, cart_view, checkout_view, delete_item_from_cart, filter_product, index, product_list_view, category_list_view , category_product_list_view, search_view, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
+from api.views import add_to_cart, ajax_add_review, cart_view, checkout_view, delete_item_from_cart, filter_product, index, payment_completed_view, payment_failed_view, product_list_view, category_list_view , category_product_list_view, search_view, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
 
 
 app_name = "api"
@@ -43,4 +43,16 @@ urlpatterns = [
     path("update-cart/",update_cart, name="update-cart"),
 
     path("checkout/",checkout_view, name="checkout"),
+
+
+    #Payment Integration
+    path('paypal/', include('paypal.standard.ipn.urls')),
+    
+    #Payment Successful
+    path("payment-completed/", payment_completed_view, name="payment-completed"),
+    
+        #Payment Failed
+    path("payment-failed/", payment_failed_view, name="payment-failed"),
+
+
 ]

@@ -1,3 +1,4 @@
+
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from taggit.models import Tag
@@ -6,6 +7,12 @@ from api.models import Product, ProductImages, ProductReview, Wishlist, Address,
 from api.forms import ProductReviewForm
 from django.template.loader import render_to_string
 from django.contrib import messages
+
+from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from paypal.standard.forms import PayPalPaymentsForm
 
 # Index view for displaying latest products
 def index(request):
@@ -248,8 +255,21 @@ def update_cart(request):
     return JsonResponse({"error": "Product not found in cart"}, status=404)
 
 from django.shortcuts import render
-
+@login_required
 def checkout_view(request):
+    host = request.get_host()
+    paypal_dict = {
+        'business': settings.PAYPAL_RECEIVER_EMAIL,
+        'amount': "400",
+        'item_name': 'Order-Item-No-5',
+        'invoice': 'INV_NO-5',
+        'currency_code': 'USD',
+        'notify_url': 'http://{}{}'.format(host,reverse('api:paypal-ipn')),
+        'return_url': 'http://{}{}'.format(host,reverse('api:payment-completed')),
+        'cancel_return': 'http://{}{}'.format(host,reverse('api:payment-failed')),
+    }
+    # Form to render the paypal button
+    payment_button_form = PayPalPaymentsForm(initial=paypal_dict)
     if 'cart_data_obj' in request.session:
         cart_data = request.session['cart_data_obj']
         cart_total_amount = sum(
@@ -260,7 +280,8 @@ def checkout_view(request):
         return render(request, 'core/checkout.html', {
             'cart_data': cart_data, 
             'cart_total_amount': cart_total_amount,
-            'total_cart_items': total_cart_items
+            'total_cart_items': total_cart_items,
+            'payment_button_form': payment_button_form
         })
     else:
         # Handle case where the cart is empty or not found
@@ -268,3 +289,31 @@ def checkout_view(request):
             'cart_data': {}, 
             'cart_total_amount': 0
         })
+
+
+def payment_completed_view(request):
+    cart_total_amount = 0
+    
+    # Safely retrieve 'cart_data_obj' from session, defaulting to an empty dictionary if not found
+    cart_data_obj = request.session.get('cart_data_obj', {})
+
+    # Calculate total cart amount
+    for product_id, item in cart_data_obj.items():
+        cart_total_amount += int(item['qty']) * float(item['price'])
+
+    context = {
+        'cart_data': cart_data_obj,
+        'totalcartitems': len(cart_data_obj),
+        'cart_total_amount': cart_total_amount,
+    }
+
+    if request.user.is_authenticated:
+        context['full_name'] = request.user.full_name
+    else:
+        context['full_name'] = "Guest"  # Fallback if user is not authenticated
+
+    return render(request, 'core/payment-completed.html', context)
+
+def payment_failed_view(request):
+    return render(request, 'core/payment-failed.html')
+

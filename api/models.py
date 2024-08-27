@@ -148,7 +148,7 @@ class ProductImages(models.Model):
 class CartOrder(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # Linked to a CustomUser
     price = models.DecimalField(max_digits=15, decimal_places=2, default="1.99")
-    paid_status = models.BooleanField(default=True)
+    paid_status = models.BooleanField(default=False)
     order_date = models.DateTimeField(auto_now_add=True)
     product_status = models.CharField(choices=STATUS_CHOICE, max_length=30, default="processing")
 
@@ -167,6 +167,10 @@ class CartOrderItems(models.Model):
 
     class Meta:
         verbose_name_plural = "Cart Order Items"  # Plural name in the admin section
+
+    def category_image(self):
+        # Displays the category image in the admin interface
+        return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
 
     def order_img(self):
         # Displays the order item image in the admin interface

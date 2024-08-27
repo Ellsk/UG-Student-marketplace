@@ -254,43 +254,67 @@ def update_cart(request):
         
     return JsonResponse({"error": "Product not found in cart"}, status=404)
 
-from django.shortcuts import render
 @login_required
 def checkout_view(request):
-    host = request.get_host()
-    paypal_dict = {
-        'business': settings.PAYPAL_RECEIVER_EMAIL,
-        'amount': "400",
-        'item_name': 'Order-Item-No-5',
-        'invoice': 'INV_NO-5',
-        'currency_code': 'USD',
-        'notify_url': 'http://{}{}'.format(host,reverse('api:paypal-ipn')),
-        'return_url': 'http://{}{}'.format(host,reverse('api:payment-completed')),
-        'cancel_return': 'http://{}{}'.format(host,reverse('api:payment-failed')),
-    }
-    # Form to render the paypal button
-    payment_button_form = PayPalPaymentsForm(initial=paypal_dict)
+    cart_total_amount = 0
+    
+    # Checking if cart_data_obj exists
     if 'cart_data_obj' in request.session:
         cart_data = request.session['cart_data_obj']
-        cart_total_amount = sum(
-            int(item.get('qty', 0)) * float(item.get('price', 0.0)) for item in cart_data.values()
+        
+        # Getting total amount for the cart and PayPal
+        for product_id, item in cart_data.items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
+
+        # Create an order
+        order = CartOrder.objects.create(
+            user=request.user,
+            price=cart_total_amount  # Set price to the total amount
         )
+
+        # Create order items
+        for product_id, item in cart_data.items():
+            CartOrderItems.objects.create(
+                order=order,
+                invoice_no="INVOICE_NO-" + str(order.id),
+                item=item['title'],
+                image=item['image'],
+                qty=item['qty'],
+                price=item['price'],
+                total=float(item['qty']) * float(item['price']),
+            )
+
+        host = request.get_host()
+        paypal_dict = {
+            'business': settings.PAYPAL_RECEIVER_EMAIL,
+            'amount': cart_total_amount,
+            'item_name': 'Order-Item-No-' + str(order.id),
+            'invoice': 'INV_NO-' + str(order.id),
+            'currency_code': 'USD',
+            'notify_url': 'http://{}{}'.format(host, reverse('api:paypal-ipn')),
+            'return_url': 'http://{}{}'.format(host, reverse('api:payment-completed')),
+            'cancel_return': 'http://{}{}'.format(host, reverse('api:payment-failed')),
+        }
+        
+        # Form to render the PayPal button
+        payment_button_form = PayPalPaymentsForm(initial=paypal_dict)
+        
         total_cart_items = sum(int(item.get('qty', 0)) for item in cart_data.values())
 
         return render(request, 'core/checkout.html', {
-            'cart_data': cart_data, 
+            'cart_data': cart_data,
             'cart_total_amount': cart_total_amount,
             'total_cart_items': total_cart_items,
             'payment_button_form': payment_button_form
         })
     else:
-        # Handle case where the cart is empty or not found
+        # Handle the case where the cart is empty or not found
         return render(request, 'core/checkout.html', {
-            'cart_data': {}, 
+            'cart_data': {},
             'cart_total_amount': 0
         })
 
-
+@login_required
 def payment_completed_view(request):
     cart_total_amount = 0
     
@@ -314,6 +338,7 @@ def payment_completed_view(request):
 
     return render(request, 'core/payment-completed.html', context)
 
+@login_required
 def payment_failed_view(request):
     return render(request, 'core/payment-failed.html')
 

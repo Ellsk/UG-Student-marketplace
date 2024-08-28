@@ -342,3 +342,22 @@ def payment_completed_view(request):
 def payment_failed_view(request):
     return render(request, 'core/payment-failed.html')
 
+
+def customer_dashboard(request):
+    orders = CartOrder.objects.filter(user=request.user).order_by("-id")
+    context = {
+        'orders': orders
+    }
+    return render(request, 'core/dashboard.html', context)
+
+def order_detail(request, id):
+    # Retrieve the order based on the user and the order ID
+    order = get_object_or_404(CartOrder, user=request.user, id=id)
+    # Retrieve the items associated with the order
+    order_items = CartOrderItems.objects.filter(order=order)
+
+    context = {
+        "order": order,  # Pass the order to the template if needed
+        "order_items": order_items,
+    }
+    return render(request, 'core/order-detail.html', context)

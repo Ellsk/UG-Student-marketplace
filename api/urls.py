@@ -1,6 +1,6 @@
 from django.urls import include, path 
 from api import views
-from api.views import add_to_cart, ajax_add_review, cart_view, checkout_view, delete_item_from_cart, filter_product, index, payment_completed_view, payment_failed_view, product_list_view, category_list_view , category_product_list_view, search_view, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
+from api.views import add_to_cart, ajax_add_review, cart_view, checkout_view, customer_dashboard, delete_item_from_cart, filter_product, index, order_detail, payment_completed_view, payment_failed_view, product_list_view, category_list_view , category_product_list_view, search_view, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
 
 
 app_name = "api"
@@ -51,8 +51,14 @@ urlpatterns = [
     #Payment Successful
     path("payment-completed/", payment_completed_view, name="payment-completed"),
     
-        #Payment Failed
+    #Payment Failed
     path("payment-failed/", payment_failed_view, name="payment-failed"),
+    
+    #Dashboard URL
+    path("dashboard/", customer_dashboard, name="dashboard"),
+    
+    #Order Detail URL
+    path("dashboard/order/<int:id>", order_detail, name="order-detail"),
 
 
 ]

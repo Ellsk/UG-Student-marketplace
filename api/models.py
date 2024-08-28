@@ -7,7 +7,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 
 # TUPLES
 STATUS_CHOICE = [
-    ("process", "Processing"),
+    ("processing", "Processing"),
     ("shipped", "Shipped"),
     ("delivered", "Delivered"),
 ]
@@ -168,9 +168,9 @@ class CartOrderItems(models.Model):
     class Meta:
         verbose_name_plural = "Cart Order Items"  # Plural name in the admin section
 
-    def category_image(self):
-        # Displays the category image in the admin interface
-        return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
+    # def category_image(self):
+    #     # Displays the category image in the admin interface
+    #     return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
 
     def order_img(self):
         # Displays the order item image in the admin interface

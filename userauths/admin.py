@@ -1,8 +1,8 @@
 # Register your models here.
 from django.contrib import admin
-from .models import CustomUser
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
+from .models import CustomUser, Profile
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 class UserCreationForm(forms.ModelForm):
     class Meta:
@@ -46,4 +46,10 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'full_name', 'phone', 'verified')
+    search_fields = ('user__id', 'full_name', 'phone')
+    ordering = ('user',)
+
 admin.site.register(CustomUser, UserAdmin)
+admin.site.register(Profile, ProfileAdmin)

@@ -8,11 +8,15 @@ from api.forms import ProductReviewForm
 from django.template.loader import render_to_string
 from django.contrib import messages
 
+
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from paypal.standard.forms import PayPalPaymentsForm
+from django.core import serializers
+
+from userauths.models import Profile
 
 # Index view for displaying latest products
 def index(request):
@@ -301,14 +305,21 @@ def checkout_view(request):
         
         total_cart_items = sum(int(item.get('qty', 0)) for item in cart_data.values())
 
+        try:
+            active_address = Address.objects.get(user=request.user, status=True)
+        
+        except Address.DoesNotExist:
+            messages.warning(request, "Activate one address from dashboard")
+            active_address = None        
+        
         return render(request, 'core/checkout.html', {
             'cart_data': cart_data,
             'cart_total_amount': cart_total_amount,
             'total_cart_items': total_cart_items,
-            'payment_button_form': payment_button_form
+            'payment_button_form': payment_button_form,
+            'active_address': active_address
         })
     else:
-        # Handle the case where the cart is empty or not found
         return render(request, 'core/checkout.html', {
             'cart_data': {},
             'cart_total_amount': 0
@@ -344,9 +355,36 @@ def payment_failed_view(request):
 
 
 def customer_dashboard(request):
-    orders = CartOrder.objects.filter(user=request.user).order_by("-id")
+    orders_list = CartOrder.objects.filter(user=request.user).order_by("-id")
+    address = Address.objects.filter(user=request.user)
+    
+    if request.method == "POST":
+        address_text = request.POST.get("address")
+        phone = request.POST.get("phone")
+
+        # Check if the same address already exists for the user
+        existing_address = Address.objects.filter(user=request.user, address=address_text, mobile=phone).first()
+
+        if not existing_address:
+            # If the address doesn't exist, create a new one
+            Address.objects.create(
+                user=request.user,
+                address=address_text,
+                mobile=phone,
+            )
+            messages.success(request, "Address added successfully.")
+        else:
+            messages.info(request, "This address already exists.")
+
+        return redirect("api:dashboard")
+
+    user_profile = Profile.objects.get(user=request.user)
+    print("user profile is: ####",  user_profile)
+
     context = {
-        'orders': orders
+        'user_profile': user_profile,
+        'orders_list': orders_list,
+        'address': address,
     }
     return render(request, 'core/dashboard.html', context)
 
@@ -361,3 +399,63 @@ def order_detail(request, id):
         "order_items": order_items,
     }
     return render(request, 'core/order-detail.html', context)
+
+def make_address_default(request):
+    id = request.GET.get('id')
+    Address.objects.update(status=False)
+    Address.objects.filter(id=id).update(status=True)
+    return JsonResponse({"boolean": True})
+
+@login_required
+def wishlist_view(request):
+    wishlist = Wishlist.objects.all()
+    context = {
+        "w":wishlist
+    }
+    return render(request, "core/wishlist.html", context)
+
+
+    # w
+
+def add_to_wishlist(request):
+    product_id = request.GET['id']
+    product = Product.objects.get(id=product_id)
+    print("product id is:" + product_id)
+
+    context = {}
+
+    wishlist_count = Wishlist.objects.filter(product=product, user=request.user).count()
+    print(wishlist_count)
+
+    if wishlist_count > 0:
+        context = {
+            "bool": True
+        }
+    else:
+        new_wishlist = Wishlist.objects.create(
+            user=request.user,
+            product=product,
+        )
+        context = {
+            "bool": True
+        }
+
+    return JsonResponse(context)
+
+def remove_wishlist(request):
+    pid = request.GET['id']
+    wishlist = Wishlist.objects.filter(user=request.user)
+    wishlist_d = Wishlist.objects.get(id=pid)
+    delete_product = wishlist_d.delete()
+    
+    context = {
+        "bool":True,
+        "w":wishlist
+    }
+    wishlist_json = serializers.serialize('json', wishlist)
+    t = render_to_string('core/async/wishlist-list.html', context)
+    return JsonResponse({'data':t,'w':wishlist_json})
+
+
+
+

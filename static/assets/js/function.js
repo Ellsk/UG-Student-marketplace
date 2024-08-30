@@ -234,5 +234,80 @@ $(document).ready(function(){
             }
         });
     });
-});
 
+    //Making default Address
+    $(document).on("click", ".make-default-address", function () {
+        let id = $(this).attr("data-address-id")
+        let this_val = $(this)
+
+        console.log("ID is:", id);
+        console.log("Element is:", this_val);
+
+        $.ajax({
+            url: "/make-default-address",
+            data: {
+                "id": id
+            },
+            dataType: "json",
+            success: function (response) {
+                console.log("Address Made Default....");
+                if (response.boolean == true) {
+                    $(".check").hide()
+                    $(".action_btn").show()
+
+                    $(".check" + id).show()
+                    $(".button" + id).hide()
+                }
+            }
+        })
+    })
+
+    // Adding to wishlist
+    $(document).on("click", ".add-to-wishlist", function () {
+        let product_id = $(this).attr("data-product-item")
+        let this_val = $(this)
+
+
+        console.log("PRoduct ID Is", product_id);
+
+        $.ajax({
+            url: "/add-to-wishlist",
+            data: {
+                "id": product_id
+            },
+            dataType: "json",
+            beforeSend: function () {
+                console.log("Adding to wishlist...")
+            },
+            success: function (response) {
+                // this_val.html("✓")
+                this_val.html("<i class='fas fa-heart text-danger'></i>")
+                if (response.bool === true) {
+                    console.log("Added to wishlist...");
+                }
+            }
+        })
+    })
+
+    // Remove from wishlist 
+    $(document).on("click", ".delete-wishlist-product", function () {
+        let wishlist_id = $(this).attr("data-wishlist-product")
+        let this_val = $(this)
+
+        console.log("wishlist id is:", wishlist_id);
+
+        $.ajax({
+            url: "/remove-from-wishlist",
+            data: {
+                "id": wishlist_id
+            },
+            dataType: "json",
+            beforeSend: function () {
+                console.log("Deleting product from wishlist...");
+            },
+            success: function (response) {
+                $("#wishlist-list").html(response.data)
+            }
+        })
+    })
+});

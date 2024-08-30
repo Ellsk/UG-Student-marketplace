@@ -1,7 +1,6 @@
 from django.urls import include, path 
 from api import views
-from api.views import add_to_cart, ajax_add_review, cart_view, checkout_view, customer_dashboard, delete_item_from_cart, filter_product, index, order_detail, payment_completed_view, payment_failed_view, product_list_view, category_list_view , category_product_list_view, search_view, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list
-
+from api.views import add_to_cart, add_to_wishlist, ajax_add_review, cart_view, checkout_view, customer_dashboard, delete_item_from_cart, filter_product, index, order_detail, payment_completed_view, payment_failed_view, product_list_view, category_list_view , category_product_list_view, remove_wishlist, search_view, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list, make_address_default, wishlist_view
 
 app_name = "api"
 
@@ -59,6 +58,17 @@ urlpatterns = [
     
     #Order Detail URL
     path("dashboard/order/<int:id>", order_detail, name="order-detail"),
+    
+    #Making address default
+    path("make-default-address/", make_address_default, name="make-default-address"),
 
+    # wishlist page
+    path("wishlist/", wishlist_view, name="wishlist"),
+    
+    path("add-to-wishlist/", add_to_wishlist, name="add-to-wishlist"),
+
+    
+    # Removing from wishlist
+    path("remove-from-wishlist/", remove_wishlist, name="remove-from-wishlist"),
 
 ]

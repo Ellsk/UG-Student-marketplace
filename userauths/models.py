@@ -25,6 +25,7 @@ class UserManager(BaseUserManager):
 
         return self.create_user(id, pin, email, phone_number, full_name, **extra_fields)
 
+
 class CustomUser(AbstractUser):
     username = None  # Explicitly remove the username field
     id = models.CharField(max_length=10, unique=True, primary_key=True)
@@ -40,3 +41,15 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.id
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="images")  # Adjusted upload_to to "images"
+    full_name = models.CharField(max_length=200, null=True, blank=True)
+    bio = models.CharField(max_length=200, null=True, blank=True)
+    phone = models.CharField(max_length=15, null=True, blank=True)  # Adjusted to match phone_number format
+    verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.id} - {self.full_name} - {self.bio}"

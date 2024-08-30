@@ -7,6 +7,7 @@ from api.models import Product, ProductImages, ProductReview, Wishlist, Address,
 from api.forms import ProductReviewForm
 from django.template.loader import render_to_string
 from django.contrib import messages
+from userauths.models import Profile
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +17,10 @@ from django.contrib.auth.decorators import login_required
 from paypal.standard.forms import PayPalPaymentsForm
 from django.core import serializers
 
-from userauths.models import Profile
+import calendar
+from django.db.models.functions import ExtractMonth
+
+
 
 # Index view for displaying latest products
 def index(request):
@@ -358,6 +362,16 @@ def customer_dashboard(request):
     orders_list = CartOrder.objects.filter(user=request.user).order_by("-id")
     address = Address.objects.filter(user=request.user)
     
+    orders = CartOrder.objects.annotate(month=ExtractMonth("order_date")).values("month").annotate(count=Count("id")).values("month", "count")
+    month = []
+    total_orders = []
+
+    for i in orders:
+        #Calender will change the number to exactly month name
+        month.append(calendar.month_name[i["month"]])
+        total_orders.append(i["count"])
+
+
     if request.method == "POST":
         address_text = request.POST.get("address")
         phone = request.POST.get("phone")
@@ -383,8 +397,12 @@ def customer_dashboard(request):
 
     context = {
         'user_profile': user_profile,
+        'orders': orders,
         'orders_list': orders_list,
         'address': address,
+        'month': month,
+        'total_orders': total_orders,
+
     }
     return render(request, 'core/dashboard.html', context)
 

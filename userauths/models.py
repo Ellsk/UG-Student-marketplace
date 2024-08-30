@@ -72,13 +72,13 @@ class ContactUs(models.Model):
     def __str__(self):
         return self.full_name
 
-#For the signals
+#For the
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(
             user=instance,
             full_name=instance.full_name,
-            phone=instance.phone_number
+            phone=instance.phone
         )
     else:
         instance.profile.full_name = instance.full_name

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
+from .models import CustomUser, Profile
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -34,3 +34,12 @@ class UserChangeForm(forms.ModelForm):  # Preserved name
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)
         self.fields['pin'].widget = forms.PasswordInput(attrs={'placeholder': 'PIN'})
+
+class ProfileForm(forms.ModelForm):
+    full_name = forms.CharField(widget=forms.TextInput(attrs={"placeholder":"Full Name"}))
+    bio = forms.CharField(widget=forms.TextInput(attrs={"placeholder":"Bio"}))
+    phone = forms.CharField(widget=forms.TextInput(attrs={"placeholder":"Phone"}))
+
+    class Meta:
+        model = Profile
+        fields = ['full_name', 'image', 'bio', 'phone']

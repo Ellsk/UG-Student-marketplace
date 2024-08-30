@@ -7,7 +7,7 @@ from api.models import Product, ProductImages, ProductReview, Wishlist, Address,
 from api.forms import ProductReviewForm
 from django.template.loader import render_to_string
 from django.contrib import messages
-from userauths.models import Profile
+from userauths.models import ContactUs, Profile
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -474,6 +474,45 @@ def remove_wishlist(request):
     t = render_to_string('core/async/wishlist-list.html', context)
     return JsonResponse({'data':t,'w':wishlist_json})
 
+# Links to Other Pages Section
+def contact(request):
+    return render(request, "core/contact.html")
 
+
+def ajax_contact_form(request):
+    full_name = request.GET['full_name']
+    email = request.GET['email']
+    phone = request.GET['phone']
+    subject = request.GET['subject']
+    message = request.GET['message']
+
+    contact = ContactUs.objects.create(
+        full_name=full_name,
+        email=email,
+        phone=phone,
+        subject=subject,
+        message=message,
+    )
+
+    data = {
+        "bool": True,
+        "message": "Message Sent Successfully"
+    }
+
+    return JsonResponse({"data":data})
+
+
+def about_us(request):
+    return render(request, "core/about_us.html")
+
+
+def purchase_guide(request):
+    return render(request, "core/purchase_guide.html")
+
+def privacy_policy(request):
+    return render(request, "core/privacy_policy.html")
+
+def terms_of_service(request):
+    return render(request, "core/terms_of_service.html")
 
 

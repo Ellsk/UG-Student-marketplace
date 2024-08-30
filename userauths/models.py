@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 class UserManager(BaseUserManager):
     def create_user(self, id, pin, email=None, phone_number=None, full_name=None, **extra_fields):
@@ -53,3 +56,37 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.id} - {self.full_name} - {self.bio}"
+    
+
+class ContactUs(models.Model):
+    full_name = models.CharField(max_length=200)
+    email = models.CharField(max_length=200)
+    phone = models.CharField(max_length=200) 
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+
+    class Meta:
+        verbose_name = "Contact Us"
+        verbose_name_plural = "Contact Us"
+
+    def __str__(self):
+        return self.full_name
+
+#For the signals
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(
+            user=instance,
+            full_name=instance.full_name,
+            phone=instance.phone_number
+        )
+    else:
+        instance.profile.full_name = instance.full_name
+        instance.profile.phone = instance.phone_number
+        instance.profile.save()
+        
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
+    
+post_save.connect(create_user_profile, sender=CustomUser)
+post_save.connect(save_user_profile, sender=CustomUser)

@@ -28,6 +28,8 @@ SECRET_KEY = 'django-insecure-+kw_5y&shmh!&94tp+k#923w@y$y0q+rk-p=&a&!q^$e%0!hh_
 DEBUG = True
 
 ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = ['https://development-server.up.railway.app']
+SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
 
 
 # Application definition

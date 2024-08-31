@@ -407,7 +407,7 @@
                         </table>
                     </div>
                     {% if  totalcartitems %}
-                    <a href="{% url 'api:checkout' %}" class="btn mb-20 w-100">Proceed To CheckOut<i class="fi-rs-sign-out ml-15"></i></a>
+                    {% comment %} <a href="{% url 'api:checkout' %}" class="btn mb-20 w-100">Proceed To CheckOut<i class="fi-rs-sign-out ml-15"></i></a> {% endcomment %}
                     {% endif %}
                 </div>
             </div>

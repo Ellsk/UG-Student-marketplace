@@ -265,7 +265,7 @@
 
                                             <div class="shopping-cart-button">
                                                 <a href="{% url 'api:cart' %}" class="outline">View cart</a>
-                                                <a href="{% url 'api:checkout' %}">Checkout</a>
+                                                {% comment %} <a href="{% url 'api:checkout' %}">Checkout</a> {% endcomment %}
                                             </div>
                                         </div>
                                     </div>
@@ -458,7 +458,7 @@
                                         <a href="#">Pages <i class="fi-rs-angle-down"></i></a>
                                         <ul class="sub-menu">
                                             <li><a href="page-about.html">About Us</a></li>
-                                            <li><a href="page-contact.html">Contact</a></li>
+                                            <li><a href="{% url 'api:contact' %}">Contact</a></li>
                                             <li><a href="{% url 'api:dashboard' %}">My Account</a></li>
                                             <li><a href="{% url 'userauths:sign-in' %}">Login</a></li>
                                             <li><a href="{% url 'userauths:sign-out' %}">Register</a></li>
@@ -508,7 +508,7 @@
                                         </div>
                                         <div class="shopping-cart-button">
                                             <a href="{% url 'api:cart' %}">View cart</a>
-                                            <a href="{% url 'api:checkout' %}">Checkout</a>
+                                            {% comment %} <a href="{% url 'api:checkout' %}">Checkout</a> {% endcomment %}
                                         </div>
                                     </div>
                                 </div>
@@ -586,7 +586,8 @@
                                     <li><a href="shop-filter.html">Shop – Filter</a></li>
                                     <li><a href="shop-wishlist.html">Shop – Wishlist</a></li>
                                     <li><a href="shop-cart.html">Shop – Cart</a></li>
-                                    <li><a href="{% url 'api:checkout' %}">Shop – Checkout</a></li>
+                                    <!-- Change URL-->
+                                    <li><a href="">Shop – Checkout</a></li>
                                     <li><a href="shop-compare.html">Shop – Compare</a></li>
                                     <li class="menu-item-has-children">
                                         <a href="#">Shop Invoice</a>
@@ -839,7 +840,7 @@
                         <li><a href="#">Delivery Information</a></li>
                         <li><a href="#">Privacy Policy</a></li>
                         <li><a href="#">Terms &amp; Conditions</a></li>
-                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="{% url 'api:contact' %}">Contact Us</a></li>
                         <li><a href="#">Support Center</a></li>
                         <li><a href="#">Careers</a></li>
                     </ul>

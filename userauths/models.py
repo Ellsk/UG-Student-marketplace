@@ -1,7 +1,10 @@
+
+from shortuuid.django_fields import ShortUUIDField
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from taggit.managers import TaggableManager
 
 
 class UserManager(BaseUserManager):
@@ -90,4 +93,33 @@ def save_user_profile(sender, instance, **kwargs):
     
 post_save.connect(create_user_profile, sender=CustomUser)
 post_save.connect(save_user_profile, sender=CustomUser)
+from userauths.models import CustomUser
 
+class ResourceCategory(models.Model):
+    cid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="rcat", alphabet="abcde12345")
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class Resource(models.Model):
+    rid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="res", alphabet="abcde12345")
+    title = models.CharField(max_length=200)
+    content = models.TextField()  # This could include text, links to articles, videos, etc.
+    category = models.ForeignKey(ResourceCategory, on_delete=models.CASCADE, related_name="resources")
+    tags = TaggableManager(blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+class UserResourceInteraction(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+    action = models.CharField(max_length=50)  # Example: "viewed", "liked", "shared"
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.resource.title} - {self.action}"

@@ -14,6 +14,11 @@ from pathlib import Path
 
 import os
 
+from environs import Env
+env = Env()
+env.read_env()
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +32,7 @@ SECRET_KEY = 'django-insecure-+kw_5y&shmh!&94tp+k#923w@y$y0q+rk-p=&a&!q^$e%0!hh_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.vercel.app']
 CSRF_TRUSTED_ORIGINS = ['https://development-server.up.railway.app']
 SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
 
@@ -185,3 +190,6 @@ CKEDITOR_CONFIGS = {
 PAYPAL_RECEIVER_EMAIL = 'kumedzroelliot30@gmail.com'
 #For testing, when live Test = False
 PAYPAL_TEST = True
+
+STRIPE_SECRET_KEY= env("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY= env("STRIPE_PUBLIC_KEY")

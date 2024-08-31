@@ -123,7 +123,8 @@
 
         try {
             checkoutButton.addEventListener("click", function () {
-            var email = "{{booking.email}}";
+            //booking or order.email
+                var email = "{{booking.email}}";
 
             checkoutButton.innerHTML = "Processing <i class='fas fa-spinner fa-spin'></i>";
 

@@ -80,6 +80,7 @@ urlpatterns = [
     path("privacy_policy/", privacy_policy, name="privacy_policy"),
     path("terms_of_service/", terms_of_service, name="terms_of_service"),
 
-    path("save_checkout_info/", views.save_checkout_info, name="save_checkout_info")
+    path("save_checkout_info/", views.save_checkout_info, name="save_checkout_info"),
+    path("api/create_checkout_session/<oid>", views.create_checkout_session, name="create_checkout_session"),
 
 ]

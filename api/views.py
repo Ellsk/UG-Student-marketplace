@@ -358,6 +358,8 @@ def checkout(request, oid):
     context = {
         "order": order,
         "order_items": order_items,
+        "stripe_publishable_key": settings.STRIPE_PUBLIC_KEY,
+        
     }
     return render(request, "core/checkout.html", context)
 
@@ -390,7 +392,7 @@ def create_checkout_session(request, oid):
     order.stripe_payment_intent = checkout_session['id']
     order.save()
 
-    print("checkkout session", checkout_session)
+    print("checkout session", checkout_session)
     return JsonResponse({"sessionId": checkout_session.id})
 
 

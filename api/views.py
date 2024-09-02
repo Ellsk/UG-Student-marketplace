@@ -265,57 +265,59 @@ def update_cart(request):
         
     return JsonResponse({"error": "Product not found in cart"}, status=404)
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.conf import settings
+from django.contrib import messages
+from .models import CartOrder, CartOrderItems, Coupon
+import stripe
+
 @login_required
 def save_checkout_info(request):
-    cart_total_amount = 0
-    total_amount = 0
-    
     if request.method == "POST":
-        full_name = request.POST.get("full_name")
-        email = request.POST.get("email")
-        mobile = request.POST.get("mobile")
-        address = request.POST.get("address")
-        city = request.POST.get("city")
-        state = request.POST.get("state")
-        country = request.POST.get("country")
+        full_name = request.POST.get("full_name").strip()
+        email = request.POST.get("email").strip()
+        mobile = request.POST.get("mobile").strip()
+        address = request.POST.get("address").strip()
+        city = request.POST.get("city").strip()
+        state = request.POST.get("state").strip()
+        country = request.POST.get("country").strip()
 
-        # Store user info in the session
-        request.session['full_name'] = full_name
-        request.session['email'] = email
-        request.session['mobile'] = mobile
-        request.session['address'] = address
-        request.session['city'] = city
-        request.session['state'] = state
-        request.session['country'] = country
+        # Store user info in the session (consider encryption for sensitive data)
+        request.session['checkout_info'] = {
+            'full_name': full_name,
+            'email': email,
+            'mobile': mobile,
+            'address': address,
+            'city': city,
+            'state': state,
+            'country': country,
+        }
 
+        # Check if cart data exists in the session
         if 'cart_data_obj' in request.session:
-            # Calculate total amount
-            for p_id, item in request.session['cart_data_obj'].items():
-                total_amount += int(item['qty']) * float(item['price'])
+            total_amount = sum(int(item['qty']) * float(item['price']) for item in request.session['cart_data_obj'].values())
 
             # Create Order Object
             order = CartOrder.objects.create(
                 user=request.user,
                 price=total_amount,
-                full_name=request.session['full_name'],
-                email=request.session['email'],
-                phone=request.session['mobile'],
-                address=request.session['address'],
-                city=request.session['city'],
-                state=request.session['state'],
-                country=request.session['country'],
+                full_name=full_name,
+                email=email,
+                phone=mobile,
+                address=address,
+                city=city,
+                state=state,
+                country=country,
             )
 
-            # Clean up session data
-            for key in ['full_name', 'email', 'mobile', 'address', 'city', 'state', 'country']:
-                if key in request.session:
-                    del request.session[key]
-
             # Create CartOrderItems
-            for p_id, item in request.session['cart_data_obj'].items():
+            for item in request.session['cart_data_obj'].values():
                 CartOrderItems.objects.create(
                     order=order,
-                    invoice_no="INVOICE_NO-" + str(order.id),
+                    invoice_no=f"INVOICE_NO-{order.id}",
                     item=item['title'],
                     image=item['image'],
                     qty=item['qty'],
@@ -323,24 +325,23 @@ def save_checkout_info(request):
                     total=float(item['qty']) * float(item['price']),
                 )
 
-        return redirect("api:checkout", order.oid)
+            # Clear session data related to checkout
+            request.session.pop('checkout_info', None)
+            request.session.pop('cart_data_obj', None)
+
+            return redirect("api:checkout", order.oid)
 
     return redirect("api:checkout")
 
 @login_required
 def checkout(request, oid):
-    try:
-        order = CartOrder.objects.get(oid=oid)
-        order_items = CartOrderItems.objects.filter(order=order)
-    except CartOrder.DoesNotExist:
-        messages.error(request, "Order does not exist.")
-        return redirect('api:cart')
+    order = get_object_or_404(CartOrder, oid=oid)
+    order_items = CartOrderItems.objects.filter(order=order)
 
     if request.method == "POST":
-        code = request.POST.get("code")
+        code = request.POST.get("code").strip()
         coupon = Coupon.objects.filter(code=code, active=True).first()
         if coupon:
-            #After coupon activation we apply a security mechanism to check if it has been applied to an order before
             if coupon in order.coupons.all():
                 messages.warning(request, "Coupon already activated")
             else:
@@ -359,44 +360,43 @@ def checkout(request, oid):
         "order": order,
         "order_items": order_items,
         "stripe_publishable_key": settings.STRIPE_PUBLIC_KEY,
-        
     }
     return render(request, "core/checkout.html", context)
 
 @csrf_exempt
 def create_checkout_session(request, oid):
-    order = CartOrder.objects.get(oid=oid)
+    order = get_object_or_404(CartOrder, oid=oid)
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    checkout_session = stripe.checkout.Session.create(
-        customer_email = order.email,
-        payment_method_types=['card'],
-        line_items = [
-            {
-                'price_data': {
-                    'currency': 'USD',
-                    'product_data': {
-                        'name': order.full_name
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            customer_email=order.email,
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'USD',
+                        'product_data': {
+                            'name': f"Order {order.id} for {order.full_name}"
+                        },
+                        'unit_amount': int(order.price * 100),
                     },
-                    'unit_amount': int(order.price * 100)
-                },
-                'quantity': 1
-            }
-        ],
-        mode = 'payment',
-        success_url = request.build_absolute_uri(reverse("core:payment-completed", args=[order.oid])) + "?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url = request.build_absolute_uri(reverse("core:payment-completed", args=[order.oid]))
-    )
+                    'quantity': 1,
+                }
+            ],
+            mode='payment',
+            success_url=request.build_absolute_uri(reverse("core:payment-completed", args=[order.oid])) + "?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=request.build_absolute_uri(reverse("core:payment-cancelled", args=[order.oid])),
+        )
 
-    order.paid_status = False
-    order.stripe_payment_intent = checkout_session['id']
-    order.save()
+        order.paid_status = False
+        order.stripe_payment_intent = checkout_session['id']
+        order.save()
 
-    print("checkout session", checkout_session)
-    return JsonResponse({"sessionId": checkout_session.id})
+        return JsonResponse({"sessionId": checkout_session.id})
 
-
-
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @login_required

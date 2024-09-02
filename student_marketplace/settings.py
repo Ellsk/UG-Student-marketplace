@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-+kw_5y&shmh!&94tp+k#923w@y$y0q+rk-p=&a&!q^$e%0!hh_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1']
+ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = ['https://development-server.up.railway.app']
 SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
 
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     
     #Third party apps
     'taggit',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     #custom apps
     'api',
     'userauths',
+    'useradmin',
     
     #Paypal integration
     'paypal.standard.ipn',

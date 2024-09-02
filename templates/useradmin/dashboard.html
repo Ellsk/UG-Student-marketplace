@@ -1,4 +1,4 @@
-
+<!-- dashboard.html -->
 {% extends 'useradmin/base.html' %}
 {% load static %}
 {% load humanize %}
@@ -10,106 +10,122 @@
             <p>Whole data about your business here</p>
         </div>
         <div>
-            <a href="{% url 'useradmin:dashboard-add-products' %}" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create Product</a>
+            <a href="{% url 'useradmin:dashboard-add-products' %}" class="btn btn-primary">
+                <i class="text-muted material-icons md-post_add"></i>Create Product
+            </a>
         </div>
     </div>
     <div class="row">
+        <!-- Revenue Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-primary-light">
+                        <i class="text-primary material-icons md-monetization_on"></i>
+                    </span>
                     <div class="text">
                         <h6 class="mb-1 card-title">Revenue</h6>
-                        <span>₵{{ revenue.price|floatformat:2|intcomma }}</span>
+                        <span>₵{{ revenue|floatformat:2|intcomma }}</span>
                     </div>
                 </article>
             </div>
         </div>
+        
+        <!-- Orders Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-success-light">
+                        <i class="text-success material-icons md-local_shipping"></i>
+                    </span>
                     <div class="text">
                         <h6 class="mb-1 card-title">Orders</h6>
-                        <span>{{total_orders_count.count}}</span>
+                        <span>{{ total_orders_count }}</span>
                     </div>
                 </article>
             </div>
         </div>
+        
+        <!-- Products Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-warning-light">
+                        <i class="text-warning material-icons md-qr_code"></i>
+                    </span>
                     <div class="text">
                         <h6 class="mb-1 card-title">Products</h6>
-                        <span>{{all_products.count}}</span>
+                        <span>{{ all_products.count }}</span>
                     </div>
                 </article>
             </div>
         </div>
+        
+        <!-- Monthly Earning Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-info-light">
+                        <i class="text-info material-icons md-shopping_basket"></i>
+                    </span>
                     <div class="text">
                         <h6 class="mb-1 card-title">Monthly Earning</h6>
-                        <span>{{ monthly_revenue.price|floatformat:2|intcomma }}</span>
+                        <span>₵{{ monthly_revenue|floatformat:2|intcomma }}</span>
                     </div>
                 </article>
             </div>
         </div>
     </div>
     
+    <!-- Latest Orders Table -->
     <div class="card mb-4">
         <header class="card-header">
-            <h4 class="card-title">Latest orders</h4>
+            <h4 class="card-title">Latest Orders</h4>
         </header>
         <div class="card-body">
             <div class="table-responsive">
-                <div class="table-responsive">
-                    <table class="table align-middle table-nowrap mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                
-                                <th class="align-middle" scope="col">Order ID</th>
-                                <th class="align-middle" scope="col">Name</th>
-                                <th class="align-middle" scope="col">Email</th>
-                                <th class="align-middle" scope="col">Phone</th>
-                                <th class="align-middle" scope="col">Date</th>
-                                <th class="align-middle" scope="col">Total</th>
-                                <th class="align-middle" scope="col">Payment Status</th>
-                                <th class="align-middle" scope="col">View Details</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for l in latest_orders %}
-                            <tr>
-                                <td><a href="#" class="fw-bold">#{{l.oid}}</a></td>
-                                <td>{{l.full_name|title}}</td>
-                                <td>{{l.email}}</td>
-                                <td>{{l.phone}}</td>
-                                <td>{{l.order_date}}</td>
-                                <td>${{l.price}}</td>
-                                <td>
-                                    {% if l.paid_status == True %}
+                <table class="table align-middle table-nowrap mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="align-middle" scope="col">Order ID</th>
+                            <th class="align-middle" scope="col">Name</th>
+                            <th class="align-middle" scope="col">Email</th>
+                            <th class="align-middle" scope="col">Phone</th>
+                            <th class="align-middle" scope="col">Date</th>
+                            <th class="align-middle" scope="col">Total</th>
+                            <th class="align-middle" scope="col">Payment Status</th>
+                            <th class="align-middle" scope="col">View Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in latest_orders %}
+                        <tr>
+                            <td><a href="#" class="fw-bold">#{{ order.oid }}</a></td>
+                            <td>{{ order.full_name|title }}</td>
+                            <td>{{ order.email }}</td>
+                            <td>{{ order.phone }}</td>
+                            <td>{{ order.order_date|date:"Y-m-d H:i" }}</td>
+                            <td>₵{{ order.price|floatformat:2|intcomma }}</td>
+                            <td>
+                                {% if order.paid_status %}
                                     <span class="badge badge-pill badge-soft-success">Paid</span>
-                                    {% else %}
+                                {% else %}
                                     <span class="badge badge-pill badge-soft-danger">Not Paid</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    
-                                    <a href="{% url 'useradmin:order_detail' l.id %}" class="btn btn-xs"> View details</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'useradmin:order_detail' order.id %}" class="btn btn-xs btn-primary">View Details</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No orders found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </section>
-
 {% endblock content %}
-        

@@ -15,29 +15,6 @@ import datetime
 
 
 #@admin_required
-def dashboard(request):
-    revenue = CartOrder.objects.aggregate(price=Sum("price"))
-    total_orders_count = CartOrder.objects.all()
-    all_products = Product.objects.all()
-    all_categories = Category.objects.all()
-    new_customers = CustomUser.objects.all().order_by("-id")[:6]
-    latest_orders = CartOrder.objects.all()
-
-    this_month = datetime.datetime.now().month
-    monthly_revenue = CartOrder.objects.filter(order_date__month=this_month).aggregate(price=Sum("price"))
-
-    
-    context = {
-        "monthly_revenue": monthly_revenue,
-        "revenue": revenue,
-        "all_products": all_products,
-        "all_categories": all_categories,
-        "new_customers": new_customers,
-        "latest_orders": latest_orders,
-        "total_orders_count": total_orders_count,
-    }
-    return render(request, "useradmin/dashboard.html", context)
-
 from django.shortcuts import render
 from django.db.models import Sum
 import datetime
@@ -53,30 +30,30 @@ from userauths.models import CustomUser
 # @admin_required
 def dashboard(request):
     # Aggregate total revenue from all orders
-    revenue = CartOrder.objects.aggregate(total_revenue=Sum("price"))["total_revenue"]
+    revenue = CartOrder.objects.aggregate(total_revenue=Sum("price"))["total_revenue"] or 0
 
-    # Get all orders and their count
+    # Get the total number of orders
     total_orders_count = CartOrder.objects.count()
 
-    # Get all products and categories
+    # Retrieve all products and categories
     all_products = Product.objects.all()
     all_categories = Category.objects.all()
 
     # Get the six most recent customers
     new_customers = CustomUser.objects.all().order_by("-id")[:6]
 
-    # Get all orders and the six most recent orders
+    # Get the six most recent orders
     latest_orders = CartOrder.objects.order_by('-id')[:6]
 
     # Get the current month
     this_month = datetime.datetime.now().month
 
     # Calculate revenue for the current month
-    monthly_revenue = CartOrder.objects.filter(order_date__month=this_month).aggregate(total_monthly_revenue=Sum("price"))["total_monthly_revenue"]
+    monthly_revenue = CartOrder.objects.filter(order_date__month=this_month).aggregate(total_monthly_revenue=Sum("price"))["total_monthly_revenue"] or 0
 
     context = {
-        "monthly_revenue": monthly_revenue or 0,
-        "revenue": revenue or 0,
+        "monthly_revenue": monthly_revenue,
+        "revenue": revenue,
         "all_products": all_products,
         "all_categories": all_categories,
         "new_customers": new_customers,
@@ -84,7 +61,6 @@ def dashboard(request):
         "total_orders_count": total_orders_count,
     }
     return render(request, "useradmin/dashboard.html", context)
-
 
 #@admin_required
 def products(request):

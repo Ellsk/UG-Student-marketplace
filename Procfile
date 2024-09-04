@@ -1,1 +1,1 @@
-web: gunicorn ecomprj.wsgi --log-file -
+web: gunicorn student_marketplace.wsgi --log-file -

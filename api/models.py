@@ -131,9 +131,8 @@ class Product(models.Model):
         return self.title  # Display title in the admin list view
 
     def get_percentage(self):
-        # Calculate and return the percentage discount between old price and new price
-        new_price = (self.price / self.old_price) * 100
-        return new_price
+        discount_percentage = 100 - (self.price / self.old_price * 100)
+        return discount_percentage
 
 class ProductImages(models.Model):
     # Additional images for a product

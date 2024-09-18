@@ -53,7 +53,9 @@ class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="images")  # Adjusted upload_to to "images"
     full_name = models.CharField(max_length=200, null=True, blank=True)
+    phone = models.CharField(max_length=200, null=True, blank=True)
     bio = models.CharField(max_length=200, null=True, blank=True)
+    country = models.CharField(max_length=200, null=True, blank=True)
     phone = models.CharField(max_length=15, null=True, blank=True)  # Adjusted to match phone_number format
     verified = models.BooleanField(default=False)
 

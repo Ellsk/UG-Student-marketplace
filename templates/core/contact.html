@@ -6,8 +6,8 @@
         <div class="page-header breadcrumb-wrap">
             <div class="container">
                 <div class="breadcrumb">
-                    <a href="index.html" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
-                    <span></span> Pages <span></span> Contact
+                    <a href="{% url 'api:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
+                    <span></span> Contact
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
                 <div class="row">
                     <div class="col-xl-10 col-lg-12 m-auto">
                         <section class="mb-50">
-                            <div class="row mb-60">
+                            {% comment %} <div class="row mb-60">
                                 <div class="col-md-4 mb-4 mb-md-0">
                                     <h4 class="mb-15 text-brand">Office</h4>
                                     205 North Michigan Avenue, Suite 810<br />
@@ -80,7 +80,7 @@
                                     <abbr title="Email">Email: </abbr><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f4c40415b4e4c5b6f6a594e5d4e014c4042">[email&#160;protected]</a><br />
                                     <a class="btn btn-sm font-weight-bold text-white mt-20 border-radius-5 btn-shadow-brand hover-up"><i class="fi-rs-marker mr-5"></i>View map</a>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
                             <div class="row">
                                 <div class="col-xl-8">
                                     <div class="contact-from-area padding-20-row-col">
@@ -106,11 +106,11 @@
                                                         <input name="telephone"  id="phone" placeholder="Your Phone" type="tel" />
                                                     </div>
                                                 </div>
-                                                <div class="col-lg-6 col-md-6">
+                                                {% comment %} <div class="col-lg-6 col-md-6">
                                                     <div class="input-style mb-20">
                                                         <input name="subject"  id="subject" placeholder="Subject" type="text" />
-                                                    </div>
-                                                </div>
+                                                    </div> 
+                                                </div> {% endcomment %}
                                                 <div class="col-lg-12 col-md-12">
                                                     <div class="textarea-style mb-30">
                                                         <textarea name="message" id="message"  placeholder="Message"></textarea>

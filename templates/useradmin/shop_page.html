@@ -31,11 +31,11 @@
                         <p class="mb-0 text-muted">Total sales:</p>
                         <h5 class="text-success">{{ total_sales.qty|default:"No Sales Yet" }}</h5>
                         <p class="mb-0 text-muted">Revenue:</p>
-                        <h5 class="text-success mb-0">${{revenue.price|default:"0.00"}}</h5>
+                        <h5 class="text-success mb-0">₵{{revenue.price|default:"0.00"}}</h5>
                     </article>
                 </div>
                 <!--  col.// -->
-                <div class="col-sm-6 col-lg-4 col-xl-3">
+                {% comment %} <div class="col-sm-6 col-lg-4 col-xl-3">
                     <h6>Bio Data</h6>
                     <p>
                         {{request.user.profile.full_name}} <br />
@@ -49,7 +49,7 @@
                         Address: {{request.user.profile.address}} <br />
                         Country: {{request.user.profile.country}} <br />
                     </p>
-                </div>
+                </div> {% endcomment %}
             </div>
         </div>
     </div>

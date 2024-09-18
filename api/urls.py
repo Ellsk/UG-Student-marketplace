@@ -1,6 +1,6 @@
 from django.urls import include, path 
 from api import views
-from api.views import about_us, add_to_cart, add_to_wishlist, ajax_add_review, ajax_contact_form, cart_view, checkout, contact, customer_dashboard, delete_item_from_cart, filter_product, index, order_detail, payment_completed_view, payment_failed_view, privacy_policy, product_list_view, category_list_view , category_product_list_view, purchase_guide, remove_wishlist, search_view, terms_of_service, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list, make_address_default, wishlist_view
+from api.views import ProductAvailabilityAPIView, about_us, add_to_cart, add_to_wishlist, ajax_add_review, ajax_contact_form, cart_view, checkout, contact, customer_dashboard, delete_item_from_cart, filter_product, index, order_detail, payment_completed_view, payment_failed_view, privacy_policy, product_list_view, category_list_view , category_product_list_view, purchase_guide, remove_wishlist, search_view, terms_of_service, update_cart, vendor_list_view, vendor_detail_view, product_detail_view, tag_list, make_address_default, wishlist_view
 
 app_name = "api"
 
@@ -82,5 +82,7 @@ urlpatterns = [
 
     path("save_checkout_info/", views.save_checkout_info, name="save_checkout_info"),
     path("api/create_checkout_session/<oid>", views.create_checkout_session, name="create_checkout_session"),
+    
+    path('api/product-availability/', ProductAvailabilityAPIView.as_view(), name='product-availability'),
 
 ]

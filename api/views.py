@@ -1,4 +1,10 @@
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from .models import Product
+from .serializers import ProductSerializer
+
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from taggit.models import Tag
@@ -562,6 +568,18 @@ def ajax_contact_form(request):
 
     return JsonResponse({"data":data})
 
+
+class ProductAvailabilityAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get('query', None)  # Get 'query' param from URL
+        if query:
+            products = Product.objects.filter(title__icontains=query, in_stock=True)  # Search by title and stock
+            if products.exists():
+                serializer = ProductSerializer(products, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "No products found or out of stock."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Please provide a search query."}, status=status.HTTP_400_BAD_REQUEST)
 
 def about_us(request):
     return render(request, "core/about_us.html")

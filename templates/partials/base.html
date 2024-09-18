@@ -472,7 +472,7 @@
                                         </ul>
                                     </li>
                                     <li>
-                                        <a href="page-contact.html">Contact</a>
+                                        <a href="{% url 'api:contact' %}">Contact</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -736,7 +736,9 @@
                             <p class="mb-45">Start Your Daily Shopping with <span class="text-brand">University of Ghana</span></p>
                             <form class="form-subcriber d-flex">
                                 <input type="email" placeholder="Your emaill address" />
-                                <button class="btn" type="submit">Subscribe</button>
+                                <a class="form-subcriber d-flex" href="{% url 'api:contact' %}">
+                                    <button class="btn" type="submit">Subscribe</button>
+                                </a>
                             </form>
                         </div>
                         <img src="{% static 'assets/imgs/banner/banner-9.png' %}" alt="newsletter" />

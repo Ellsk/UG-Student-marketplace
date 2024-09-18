@@ -8,9 +8,8 @@ from django.contrib.auth.hashers import check_password
 from api.models import CartOrder, CartOrderItems, Product, Category, ProductReview
 from useradmin.forms import AddProductForm
 from userauths.models import Profile, CustomUser
-#from useradmin.forms import AddProductForm
 import datetime
-#from useradmin.decorators import admin_required
+from useradmin.decorators import admin_required
 # Create your views here.
 
 
@@ -24,18 +23,14 @@ from userauths.models import CustomUser
 
 # Create your views here.
 
-# Uncomment and use this decorator if you want to restrict access to admins only
-# from useradmin.decorators import admin_required
+from useradmin.decorators import admin_required
 
-# @admin_required
+@admin_required
 def dashboard(request):
-    # Aggregate total revenue from all orders
     revenue = CartOrder.objects.aggregate(total_revenue=Sum("price"))["total_revenue"] or 0
 
-    # Get the total number of orders
     total_orders_count = CartOrder.objects.count()
 
-    # Retrieve all products and categories
     all_products = Product.objects.all()
     all_categories = Category.objects.all()
 
@@ -62,7 +57,7 @@ def dashboard(request):
     }
     return render(request, "useradmin/dashboard.html", context)
 
-#@admin_required
+@admin_required
 def products(request):
     all_products = Product.objects.all()
     all_categories = Category.objects.all()
@@ -73,7 +68,7 @@ def products(request):
     }
     return render(request, "useradmin/products.html", context)
 
-#@admin_required
+@admin_required
 def add_product(request):
     if request.method == "POST":
         form = AddProductForm(request.POST, request.FILES)
@@ -91,7 +86,7 @@ def add_product(request):
     return render(request, "useradmin/add-products.html", context)
 
 
-#@admin_required
+@admin_required
 def edit_product(request, pid):
     product = Product.objects.get(pid=pid)
 
@@ -110,13 +105,13 @@ def edit_product(request, pid):
     }
     return render(request, "useradmin/edit-products.html", context)
 
-#@admin_required
+@admin_required
 def delete_product(request, pid):
     product = Product.objects.get(pid=pid)
     product.delete()
     return redirect("useradmin:dashboard-products")
 
-#@admin_required
+@admin_required
 def orders(request):
     orders = CartOrder.objects.all()
     context = {
@@ -124,7 +119,7 @@ def orders(request):
     }
     return render(request, "useradmin/orders.html", context)
 
-#@admin_required
+@admin_required
 def order_detail(request, id):
     order = CartOrder.objects.get(id=id)
     order_items = CartOrderItems.objects.filter(order=order)
@@ -134,7 +129,7 @@ def order_detail(request, id):
     }
     return render(request, "useradmin/order_detail.html", context)
 
-#@admin_required
+@admin_required
 @csrf_exempt
 def change_order_status(request, oid):
     order = CartOrder.objects.get(oid=oid)
@@ -144,7 +139,7 @@ def change_order_status(request, oid):
         messages.success(request, f"Order status changed to {status}")
         order.product_status = status
         order.save()
-    
+
     return redirect("useradmin:order_detail", order.id)
 
 #@admin_required
@@ -183,6 +178,7 @@ def settings(request):
         
         if image != None:
             profile.image = image
+        
         profile.full_name = full_name
         profile.phone = phone
         profile.bio = bio

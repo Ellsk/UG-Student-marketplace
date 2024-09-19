@@ -908,11 +908,11 @@
             <div class="col-xl-4 col-lg-6 text-center d-none d-xl-block">
                 <div class="hotline d-lg-inline-flex mr-30">
                     <img src="{% static 'assets/imgs/theme/icons/phone-call.svg' %}" alt="hotline" />
-                    <p>1900 - 6666<span>Working 8:00 - 22:00</span></p>
+                    Work Hours 8:00 - 22:00</span></p>
                 </div>
                 <div class="hotline d-lg-inline-flex">
                     <img src="{% static 'assets/imgs/theme/icons/phone-call.svg' %}" alt="hotline" />
-                    <p>1900 - 8888<span>24/7 Support Center</span></p>
+                    <span>24/7 ChatBot Support </span></p>
                 </div>
             </div>
             <div class="col-xl-4 col-lg-6 col-md-6 text-end d-none d-md-block">
@@ -964,6 +964,21 @@
 <script src="{% static 'assets/js/main.js' %}"></script>
 <script src="{% static 'assets/js/shop.js' %}"></script>
 <script src="{% static 'assets/js/function.js' %}"></script>
+
+{% comment %} Chatbot Script {% endcomment %}
+<script type="text/javascript">
+    (function(d, t) {
+        var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+        v.onload = function() {
+            window.voiceflow.chat.load({
+            verify: { projectID: '66db54aee86178552f183b0b' },
+            url: 'https://general-runtime.voiceflow.com',
+            versionID: 'production'
+            });
+        }
+        v.src = "https://cdn.voiceflow.com/widget/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+    })(document, 'script');
+</script>
 </body>
 
 </html>

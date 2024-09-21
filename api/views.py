@@ -23,6 +23,7 @@ from django.contrib.auth.decorators import login_required
 
 #payment integration
 import stripe
+import requests
 from paypal.standard.forms import PayPalPaymentsForm
 from django.core import serializers
 
@@ -580,6 +581,66 @@ class ProductAvailabilityAPIView(APIView):
             else:
                 return Response({"message": "No products found or out of stock."}, status=status.HTTP_404_NOT_FOUND)
         return Response({"error": "Please provide a search query."}, status=status.HTTP_400_BAD_REQUEST)
+
+import logging
+import requests
+from django.http import JsonResponse
+from .models import Product  # Your Product model
+
+logger = logging.getLogger(__name__)
+
+def extract_product_name(message):
+    keywords = ["check", "availability", "of", "product", "for", "available"]
+    words = message.split()
+    product_name = ' '.join([word for word in words if word.lower() not in keywords])
+    return product_name.strip()
+
+def voiceflow_chat(request):
+    if request.method == 'POST':
+        user_message = request.POST.get('message')
+        user_id = request.user.id  # Assuming user authentication is required
+
+        # Handling product availability query
+        if "check product availability" in user_message.lower():
+            product_name = extract_product_name(user_message)  # Extract product name
+            logger.info(f"Extracted product name: {product_name}")  # Log the product name
+
+            try:
+                product = Product.objects.get(title__icontains=product_name)
+                response_message = f"The product {product.title} is available at {product.price} with {product.stock_count} in stock."
+            except Product.DoesNotExist:
+                logger.warning(f"Product '{product_name}' not found.")
+                response_message = "Sorry, the product you're looking for is not available."
+
+        else:
+            # Forwarding the message to Voiceflow if it's not a product query
+            headers = {
+                'Authorization': 'VF.DM.66ec11849a80daac38b299db.eSTtjEha0hSrvf7X',  # Voiceflow API Key
+                'Content-Type': 'application/json'
+            }
+
+            payload = {
+                'userID': str(user_id),  # Convert user ID to string for consistency
+                'message': user_message
+            }
+
+            try:
+                voiceflow_response = requests.post(
+                    'https://general-runtime.voiceflow.com/state/66db54aee86178552f183b0b/dialog',
+                    headers=headers,
+                    json=payload
+                )
+                voiceflow_response.raise_for_status()  # Raise an error for bad responses
+                response_data = voiceflow_response.json()
+                response_message = response_data.get('message', 'Sorry, I didn\'t understand that.')
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Voiceflow API request failed: {e}")
+                response_message = "Sorry, there was an error processing your request."
+
+        return JsonResponse({"response": response_message})
+    else:
+        logger.error("Invalid request method. Expected POST.")
+        return JsonResponse({"error": "Invalid request method. Only POST is allowed."}, status=400)
 
 def about_us(request):
     return render(request, "core/about_us.html")

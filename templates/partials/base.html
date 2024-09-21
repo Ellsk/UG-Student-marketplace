@@ -370,12 +370,9 @@
                                     <li>
                                         <a href="#">Vendors <i class="fi-rs-angle-down"></i></a>
                                         <ul class="sub-menu">
-                                            <li><a href="vendors-grid.html">Vendors Grid</a></li>
-                                            <li><a href="vendors-list.html">Vendors List</a></li>
-                                            <li><a href="vendor-details-1.html">Vendor Details 01</a></li>
-                                            <li><a href="vendor-details-2.html">Vendor Details 02</a></li>
-                                            <li><a href="vendor-dashboard.html">Vendor Dashboard</a></li>
-                                            <li><a href="vendor-guide.html">Vendor Guide</a></li>
+                                            <li><a href="{% url 'api:vendor-list' %}">Vendors Grid</a></li>
+                                            <li><a href="{% url 'useradmin:shop_page' %}">Vendor Dashboard</a></li>
+                                            <li><a href="#">Vendor Guide</a></li>
                                         </ul>
                                     </li>
                                     <li class="position-static">
@@ -480,7 +477,7 @@
                     </div>
                     <div class="hotline d-none d-lg-flex">
                         <img src="{% static 'assets/imgs/theme/icons/icon-headphone.svg' %}" alt="hotline" />
-                        <p>1900 - 888<span>24/7 Support Center</span></p>
+                        <p><span>24/7 Bot Support</span></p>
                     </div>
                     <div class="header-action-icon-2 d-block d-lg-none">
                         <div class="burger-icon burger-icon-white">
@@ -606,10 +603,8 @@
                             <li class="menu-item-has-children">
                                 <a href="#">Vendors</a>
                                 <ul class="dropdown">
-                                    <li><a href="vendors-grid.html">Vendors Grid</a></li>
+                                    <li><a href="{% url 'api:vendor-list' %}">Vendors Grid</a></li>
                                     <li><a href="vendors-list.html">Vendors List</a></li>
-                                    <li><a href="vendor-details-1.html">Vendor Details 01</a></li>
-                                    <li><a href="vendor-details-2.html">Vendor Details 02</a></li>
                                     <li><a href="vendor-dashboard.html">Vendor Dashboard</a></li>
                                     <li><a href="vendor-guide.html">Vendor Guide</a></li>
                                 </ul>
@@ -646,6 +641,8 @@
                                     </li>
                                 </ul>
                             </li>
+
+                            {% comment %} Blog Section 
                             <li class="menu-item-has-children">
                                 <a href="blog-category-fullwidth.html">Blog</a>
                                 <ul class="dropdown">
@@ -662,7 +659,7 @@
                                         </ul>
                                     </li>
                                 </ul>
-                            </li>
+                            </li> {% endcomment %}
                             <li class="menu-item-has-children">
                                 <a href="#">Pages</a>
                                 <ul class="dropdown">
@@ -910,10 +907,10 @@
                     <img src="{% static 'assets/imgs/theme/icons/phone-call.svg' %}" alt="hotline" />
                     Work Hours 8:00 - 22:00</span></p>
                 </div>
-                <div class="hotline d-lg-inline-flex">
+                {% comment %} <div class="hotline d-lg-inline-flex">
                     <img src="{% static 'assets/imgs/theme/icons/phone-call.svg' %}" alt="hotline" />
                     <span>24/7 ChatBot Support </span></p>
-                </div>
+                </div> {% endcomment %}
             </div>
             <div class="col-xl-4 col-lg-6 col-md-6 text-end d-none d-md-block">
                 <div class="mobile-social-icon">
@@ -970,15 +967,18 @@
     (function(d, t) {
         var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
         v.onload = function() {
-            window.voiceflow.chat.load({
-            verify: { projectID: '66db54aee86178552f183b0b' },
+        window.voiceflow.chat.load({
+            verify: { projectID: '66db54aee86178552f183b0b' },  // Use your Voiceflow project ID
             url: 'https://general-runtime.voiceflow.com',
             versionID: 'production'
-            });
+        });
         }
-        v.src = "https://cdn.voiceflow.com/widget/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+        v.src = "https://cdn.voiceflow.com/widget/bundle.mjs"; 
+        v.type = "text/javascript"; 
+        s.parentNode.insertBefore(v, s);
     })(document, 'script');
 </script>
+
 </body>
 
 </html>

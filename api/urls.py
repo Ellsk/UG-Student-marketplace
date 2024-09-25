@@ -83,6 +83,6 @@ urlpatterns = [
     path("save_checkout_info/", views.save_checkout_info, name="save_checkout_info"),
     path("api/create_checkout_session/<oid>", views.create_checkout_session, name="create_checkout_session"),
     
-    path('api/product-availability/', ProductAvailabilityAPIView.as_view(), name='product-availability'),
+    #path('api/product-availability/', ProductAvailabilityAPIView.as_view(), name='product-availability'),
 
 ]

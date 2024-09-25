@@ -4,6 +4,10 @@ from django.utils.html import mark_safe
 from userauths.models import CustomUser
 from taggit.managers import TaggableManager
 from ckeditor_uploader.fields import RichTextUploadingField
+from PIL import Image
+from django.core.files.base import ContentFile
+import io
+
 
 # TUPLES
 STATUS_CHOICE = [
@@ -86,7 +90,6 @@ class Product(models.Model):
     pid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="pd", alphabet="abcde12345")
     title = models.CharField(max_length=100, default="Nike")  # Product Title
     image = models.ImageField(upload_to=user_directory_path, default="product.jpg")  # Product image
-    #description = models.TextField(null=True, blank=True, default="This is a product")
     description = RichTextUploadingField(null=True, blank=True, default="This is a product")
 
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)  # Linked to a CustomUser
@@ -98,7 +101,6 @@ class Product(models.Model):
     old_price = models.DecimalField(max_digits=15, decimal_places=2, default="2.99")
 
     specification = RichTextUploadingField(null=True, blank=True)
-    #specification = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=100, default="Organic", null=True, blank=True)  
     stock_count = models.CharField(max_length=100, default="10", null=True, blank=True) 
     life = models.CharField(max_length=100, default="100 Days", null=True, blank=True) 
@@ -106,7 +108,6 @@ class Product(models.Model):
 
 
     tags = TaggableManager(blank=True)
-    # tags = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)  # Linked to a Tag
 
     product_status = models.CharField(choices=STATUS, max_length=10, default="in_review")
 
@@ -119,30 +120,89 @@ class Product(models.Model):
 
     date = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(null=True, blank=True)
-
+    #average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)  # e.g., allows ratings from 0.00 to 5.00
+    is_deal = models.BooleanField(default=False)  # Add this line
+    deal_end_time = models.DateTimeField(null=True, blank=True)  # Optional, for deal expiration
     class Meta:
         verbose_name_plural = "Products"  # Plural name in the admin section
 
-    def product_image(self):
+    def save(self, *args, **kwargs):
+        super(Product, self).save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image)
+
+            # Convert to RGB if necessary
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+
+            # Check if the image needs resizing
+            if img.height > 1100 or img.width > 1100:
+                output_size = (1100, 1100)
+                img = img.resize(output_size)
+
+                # Save the image with high quality
+                image_format = img.format or 'JPEG'
+                image_io = io.BytesIO()
+                img.save(image_io, format=image_format, quality=90)  # Adjust quality parameter
+
+                # Save the image to the field
+                self.image.save(self.image.name, ContentFile(image_io.getvalue()), save=False)
+
+                # Save the instance again after resizing the image
+                super(Product, self).save(*args, **kwargs)
+
+    def product_image(self): 
         # Displays the product image in the admin interface
-        return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
+        if self.image:
+            return mark_safe('<img src="%s" width="50" height="50" style="object-fit:cover;"/>'% (self.image.url))
+        else:
+            return "No Image"
+
+    product_image.short_description = 'Image Preview'
 
     def __str__(self):
         return self.title  # Display title in the admin list view
 
     def get_percentage(self):
-        discount_percentage = 100 - (self.price / self.old_price * 100)
-        return discount_percentage
-
+        if self.old_price and self.price:
+            discount_percentage = 100 - (self.price / self.old_price * 100)
+            return round(discount_percentage, 2)
+        return 0
+    
 class ProductImages(models.Model):
-    # Additional images for a product
     images = models.ImageField(upload_to="product-images", default="product.jpg")
-    product = models.ForeignKey(Product, related_name="p_images", on_delete=models.SET_NULL, null=True)  # Linked to a Product
+    product = models.ForeignKey(Product, related_name="p_images", on_delete=models.SET_NULL, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = "Product Images"  # Plural name in the admin section
+        verbose_name_plural = "Product Images"
 
+    def save(self, *args, **kwargs):
+        super(Product, self).save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image)
+
+            # Convert to RGB if necessary
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+
+            # Check if the image needs resizing
+            if img.height > 1100 or img.width > 1100:
+                output_size = (1100, 1100)
+                img = img.resize(output_size)
+
+                # Save the image with high quality
+                image_format = img.format or 'JPEG'
+                image_io = io.BytesIO()
+                img.save(image_io, format=image_format, quality=90)  # Adjust quality parameter
+
+                # Save the image to the field
+                self.image.save(self.image.name, ContentFile(image_io.getvalue()), save=False)
+
+                # Save the instance again after resizing the image
+                super(Product, self).save(*args, **kwargs)
 ######## Cart, Order, and OrderItems ########
 class CartOrder(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

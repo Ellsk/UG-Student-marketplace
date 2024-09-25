@@ -4,7 +4,7 @@ astunparse==1.6.3
 certifi==2024.7.4
 charset-normalizer==3.3.2
 dj-database-url==2.2.0
-Django==5.0.6  
+Django==5.0.8  
 django-ckeditor==6.7.1  
 django-env==0.2.1
 django-jazzmin==3.0.0  

@@ -1,4 +1,5 @@
 
+from datetime import timedelta, timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -15,7 +16,6 @@ from django.template.loader import render_to_string
 from django.contrib import messages
 from userauths.models import ContactUs, Profile
 
-
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.conf import settings
@@ -29,13 +29,47 @@ from django.core import serializers
 
 import calendar
 from django.db.models.functions import ExtractMonth
+from datetime import timedelta
 
 
+from django.db.models import Avg
+
+from django.utils import timezone
+from datetime import timedelta
 
 # Index view for displaying latest products
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Q
+
 def index(request):
     products = Product.objects.filter(featured=True, product_status="published")
-    context = {"products": products}
+    recently_added = Product.objects.order_by('-date')[:3]
+    top_selling = Product.objects.filter(product_status="published").order_by('-stock_count')[:3]
+    trending_products = Product.objects.filter(product_status="published").order_by('-date')[:3]
+
+    # Get top-rated products based on average rating from related reviews
+    top_rated = Product.objects.annotate(
+        average_rating=Avg('reviews__rating')  # Calculate average rating
+    ).filter(product_status="published").order_by('-average_rating')[:3]
+
+    # Set deal end time for each product
+    for product in products:
+        product.deal_end_time = timezone.now() + timedelta(days=1)  # Set deal for 1 day
+        product.is_deal = True  # Mark as a deal
+        product.save()
+
+    # Query for products that have a deal, limit to 4
+    deals = Product.objects.filter(is_deal=True, product_status="published")[:4]
+
+    context = {
+        "products": products,
+        "recently_added": recently_added,
+        "top_selling": top_selling,
+        "trending_products": trending_products,
+        "top_rated": top_rated,
+        "deals": deals,  # Add deals to context
+    }
     return render(request, "core/index.html", context)
 
 # View to list all published products
@@ -494,53 +528,30 @@ def make_address_default(request):
 
 @login_required
 def wishlist_view(request):
-    wishlist = Wishlist.objects.all()
-    context = {
-        "w":wishlist
-    }
+    wishlist = Wishlist.objects.filter(user=request.user)  # Filter by the logged-in user
+    context = {"w": wishlist}
     return render(request, "core/wishlist.html", context)
 
-
-    # w
-
+@login_required
 def add_to_wishlist(request):
-    product_id = request.GET['id']
-    product = Product.objects.get(id=product_id)
-    print("product id is:" + product_id)
+    product_id = request.GET.get('id')
+    product = get_object_or_404(Product, id=product_id)  # Ensure product exists
+    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, product=product)
 
-    context = {}
-
-    wishlist_count = Wishlist.objects.filter(product=product, user=request.user).count()
-    print(wishlist_count)
-
-    if wishlist_count > 0:
-        context = {
-            "bool": True
-        }
-    else:
-        new_wishlist = Wishlist.objects.create(
-            user=request.user,
-            product=product,
-        )
-        context = {
-            "bool": True
-        }
-
+    context = {"bool": created}  # 'created' tells if it was newly added
     return JsonResponse(context)
 
+@login_required
 def remove_wishlist(request):
-    pid = request.GET['id']
-    wishlist = Wishlist.objects.filter(user=request.user)
-    wishlist_d = Wishlist.objects.get(id=pid)
-    delete_product = wishlist_d.delete()
-    
-    context = {
-        "bool":True,
-        "w":wishlist
-    }
+    pid = request.GET.get('id')
+    wishlist_d = get_object_or_404(Wishlist, user=request.user, id=pid)
+    wishlist_d.delete()
+
+    wishlist = Wishlist.objects.filter(user=request.user)  # Update the list after removal
+    context = {"w": wishlist}
     wishlist_json = serializers.serialize('json', wishlist)
     t = render_to_string('core/async/wishlist-list.html', context)
-    return JsonResponse({'data':t,'w':wishlist_json})
+    return JsonResponse({'data': t, 'w': wishlist_json})
 
 # Links to Other Pages Section
 def contact(request):

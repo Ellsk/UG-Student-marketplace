@@ -311,6 +311,44 @@ $(document).ready(function(){
         })
     })
 
+    $(document).ready(function() {
+        $('.deals-countdown').each(function() {
+            var $this = $(this);
+            var countdownDate = $this.data('countdown');
+    
+            // Set the date we're counting down to
+            var countDownDate = new Date(countdownDate).getTime();
+    
+            // Update the count down every 1 second
+            var x = setInterval(function() {
+                // Get today's date and time
+                var now = new Date().getTime();
+                // Find the distance between now and the count down date
+                var distance = countDownDate - now;
+    
+                // Time calculations for days, hours, minutes and seconds
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+                // Display the result in the elements with class "deals-countdown"
+                $this.html(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+    
+                // If the countdown is over, display some message
+                if (distance < 0) {
+                    clearInterval(x);
+                    $this.html("DEAL EXPIRED!"); // or you can hide the product
+                    if (distance < 300000 && distance > 0) {
+                        alert("Hurry! Only 5 minutes left for this deal!");
+                    }
+                    
+                    // $this.closest('.product-cart-wrap').hide(); 
+                }
+            }, 1000);
+        });
+    });
+    
     $(document).on("submit", "#contact-form-ajax", function (e) {
         e.preventDefault()
         console.log("Submitted...");

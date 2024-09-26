@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 import os
@@ -54,6 +55,12 @@ INSTALLED_APPS = [
     #Third party apps
     'taggit',
     'ckeditor',
+    'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
+    'corsheaders',
+    'anymail',
+    #'storages',
+    
     #custom apps
     'api',
     'userauths',
@@ -66,6 +73,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -157,16 +165,91 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# Custom Admin Settings 
 JAZZMIN_SETTINGS = {
     "site_title": "UG Student Marketplace Admin",
-    "site_header": "UG Student Marketplace Admin",
+    "site_header": "UG Student Marketplace",
     "site_brand": "You order, we deliver!",
     "site_logo": "assets/imgs/theme/ug_logo.png",
     "welcome_sign": "Welcome to the UG Student Marketplace admin panel",
-    "copyright": "UG_Student Marketplace 2024",
-    "search_model": "auth.User",
-    # "user_avatar": "images/user-avatar.png",
+    "copyright": "UG Student Marketplace 2024",
+    "user_avatar": "images/user-avatar.png",  # Assuming you might have a user avatar to use
+
+    # Customizing top menu links for the marketplace
+    "topmenu_links": [
+        {"name": "Dashboard", "url": "home", "permissions": ["auth.view_user"]},
+        {"model": "auth.User"},
+        {"app": "products"},  # Assuming you have an app named 'products'
+        {"model": "orders.Order"},  # Assuming an order model for tracking purchases
+        {"model": "marketplace.Product"},  # Link to your marketplace products
+    ],
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    # Custom ordering of models in the admin
+    "order_with_respect_to": [
+        "marketplace.Product",
+        "marketplace.Category",
+        "orders.Order",
+        "marketplace.Review",  # Assuming you have a review model
+    ],
+
+    # Icons for each model based on your project context
+    "icons": {
+        "auth.User": "fas fa-user",
+        "marketplace.Product": "fas fa-box",
+        "marketplace.Category": "fas fa-tags",
+        "orders.Order": "fas fa-shopping-cart",
+        "marketplace.Review": "fas fa-star",
+    },
+
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-arrow-circle-right",
+    "related_modal_active": False,
+    "custom_js": None,
+    "show_ui_builder": True,
+    
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "marketplace.product": "vertical_tabs",
+    },
 }
+
+# Jazzmin UI Tweaks for the UG Student Marketplace
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": True,
+    "brand_small_text": False,
+    "brand_colour": "navbar-indigo",
+    "accent": "accent-olive",
+    "navbar": "navbar-indigo navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-indigo",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
 
 LOGIN_URL = 'userauths:sign-in'
 
@@ -190,6 +273,61 @@ CKEDITOR_CONFIGS = {
         ),
     },
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# ANYMAIL = {
+#     "MAILERSEND_API_TOKEN": "mlsn.",
+# }
+
+
+
+# FROM_EMAIL=env("FROM_EMAIL")
+# EMAIL_BACKEND=env("EMAIL_BACKEND")
+# DEFAULT_FROM_EMAIL=env("DEFAULT_FROM_EMAIL")
+# SERVER_EMAIL=env("SERVER_EMAIL")
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=50),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+
 
 PAYPAL_RECEIVER_EMAIL = 'kumedzroelliot30@gmail.com'
 #For testing, when live Test = False

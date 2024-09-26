@@ -26,10 +26,10 @@
                                                 <figure class="border-radius-10">
                                                     <img src="{{ product.image.url }}" alt="product image" />
                                                 </figure>
-                                                <!-- Display additional images from p_image -->
-                                                {% for p in p_image %}
+                                                <!-- Display additional images from p_images -->
+                                                {% for p in p_images %}
                                                 <figure class="border-radius-10">
-                                                    <img  src="{{ p.images.url }}" alt="additional product image" />
+                                                    <img src="{{ p.images.url }}" alt="additional product image" />
                                                 </figure>
                                                 {% endfor %}
                                             </div>
@@ -38,8 +38,9 @@
                                             <div class="slider-nav-thumbnails">
                                                 <!-- Thumbnail for the main product image -->
                                                 <div><img src="{{ product.image.url }}" alt="product image" /></div>
+                                        
                                                 <!-- Thumbnails for the additional images -->
-                                                {% for p in p_image %}
+                                                {% for p in p_images %}
                                                 <div><img src="{{ p.images.url }}" alt="additional product image" /></div>
                                                 {% endfor %}
                                             </div>
